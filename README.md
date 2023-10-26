@@ -4,21 +4,18 @@
 
 In a world where chat applications like WhatsApp became the primary sources of communication, ensuring reliability and availability of these systems is very critical. Take for instance the WhatsApp outage in October 2022, which affected 2 billion users world-wide ([source](https://www.livemint.com/news/world/whatsapp-down-top-5-outages-that-disrupted-the-world-11666687792717.html)). 
 
-**The Fascination**
 
 From the perspective of a software engineer, the challenge of designing a chat application that is not only robust but can also handle the demands of a growing user base is interesting. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
+
+I will define our project's scope and requirements, sketch out a high-level system design, build a working prototype, and finally, present potential bottlenecks and strategies to solve these issues.
 
 **Disclaimer**
 
 Before going into technical details, it is important to note that the application I developed is best suited for prototyping purposes. It lacks data validation and other features that are required for production environments.
 
-**Structure**
-
-I will define our project's scope and requirements, sketch out a high-level system design, build a working prototype, and finally, present potential bottlenecks and strategies to solve these issues.
-
 ## Scope
 
-In this project I focus on the core components required for a functional prototype of a simple chat system. It is not my goal to create advanced features for the end users, but instead focus more on availability and scalability of the system.
+In this project I focus on the core components required for a functional prototype of a simple chat system. It is not my goal to create advanced features for the end users, but instead focus more on availability and scalability of the whole system.
 
 **Functional requirements**
 
@@ -52,35 +49,31 @@ Our technical architecture is a set of interconnected components, each playing a
 - **Service Discovery**: A service responsible for routing users to available WebSocket servers, ensuring load balancing.
 - **Service Discovery DB**: This database maintains the status of different WebSocket servers, indicating whether they are online, offline, or deleted.
 - **Message Queue (Chats)**: Messages are added to queues, allowing for fanout and ensuring multiple clients can receive the same message.
-- **Messaging Service**: This service fetches the old messages on a page reload.
+- **Messaging Service**: This service fetches old messages on a page reload.
 - **Chats DB**: All messages are stored in a Cassandra key-value database.
 - **Presence Service**: Users receive real-time updates on the online and last seen status of others.
 - **Presence DB**: The status of each user is stored in a Cassandra database.
 
 ### A functional chat
-
 I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React due to its familiarity and the speed it offers for building interfaces. However, it is important to note that the Create React App (CRA) framework has been discontinued since the start of 2023, and it might be smart to explore alternatives like *Vite*.
 
 WebSockets emerged as the communication method of choice. Their persistent, bidirectional connection enables efficient data exchange between clients and the server. While various WebSocket libraries exist, I opted for the native JavaScript WebSocket module for simplicity. One drawback of the native approach is the absence of automatic reconnection to the WebSocket server. As a solution, the client attempts to reconnect every 1000ms when the connection is lost.
 
 ### Scaling WebSockets
-
-However, a single WebSocket is not sufficient for serving millions of users. This would put much stress on the WebSocket server and result in a Single Point of Failure, where server downtime could disrupt the entire service. To address this, I developed the **Service Discovery** service, responsible for distributing the user load across multiple WebSocket servers. 
+However, a single WebSocket is not sufficient for serving millions of users. This would put much stress on the WebSocket server and result in a Single Point Of Failure (SPOF), where server downtime could disrupt the entire service. To address this, I developed the **Service Discovery** service, responsible for distributing the user load across multiple WebSocket servers. 
 
 For our prototype, I used a round-robin approach to balance the load among WebSocket servers. If we have three WebSocket servers, client1 connects to socket1, client2 to socket2, and so on. This simplistic approach, while easy to implement, has its shortcomings. For example, it might lead to uneven workloads, with some connections being more active, resulting in hot partitions. Scaling up or down can also introduce problems. More on this topic is discussed in the chapter “Bottlenecks”.
 
 ### Monitoring WebSocket servers
-
-WebSocket servers can go down, making it crucial to avoid routing users to inactive servers. To tackle this challenge, the **Service Discovery DB** is created, a key-value store tracking the status of each server. Instead of directly checking server status in the Service Discovery service, the gossip protocol is implemented. In this protocol, every WebSocket server sends heartbeats at regular intervals to a random set of WebSocket servers. These servers maintain an internal data structure to track the received heartbeats. Periodically, each WebSocket server checks the latest heartbeat timestamp from the servers it received heartbeats. If this timestamp exceeds a certain threshold (e.g., 30000ms), the WebSocket server contacts other servers to determine if the server is genuinely offline. If no other servers confirm activity, the server is considered down.
+WebSocket servers can go down, making it crucial to avoid routing users to inactive servers. To tackle this challenge, the **Service Discovery DB** is created, a key-value store tracking the status of each server. Instead of directly checking server status in the Service Discovery service, the gossip protocol is implemented. In this protocol, every WebSocket server sends heartbeats at regular intervals to a random set of WebSocket servers. These servers maintain an internal data structure to track the received heartbeats. Periodically, each WebSocket server checks the latest heartbeat timestamp from the servers it received heartbeats from. If this timestamp exceeds a certain threshold (e.g., 30000ms), the WebSocket server contacts other servers to determine if the server is genuinely offline. If no other servers confirm activity, the server is considered down.
 
 ### Message queues
+Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I chose to use RabbitMQ, a queuing technology highlighted in the System Design book. Additionally, I found it straightforward to implement a running RabbitMQ cluster with NodeJS.
 
-Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I choose to use RabbitMQ, a queuing technology highlighted in the System Design book. Additionally, I found it straightforward to implement a running RabbitMQ cluster with NodeJS.
+It is essential to distinguish the terminologies of a "client" and a "user." A "client" refers to an user visiting the website, and a user could have multiple clients, such as in the case of multiple browser tabs. The system operates as follows when an user connects:
 
-It is essential to distinguish the terminologies of a "client" and a "user." A "client" refers to a user visiting the website, and a user could have multiple clients, such as in the case of multiple browser tabs. The system operates as follows when a user connects:
-
-- Every user has a personal queue, e.g., `{user}-messages`, where messages are sent. If the queue does not exist, it is created on connection.
-- Since one user might have multiple clients, each client has a personal queue, e.g., `{user}-{uuid}-messages`, with a unique identifier (UUID) to distinguish between user tabs. This id is created on the client-side.
+- Every user has a personal queue, e.g., `{user}-messages`, where messages are sent to. If the queue does not exist, it is created on connection.
+- Since one user might have multiple clients, each client has a personal queue, e.g., `{user}-{uuid}-messages`, with a unique identifier (UUID) to distinguish between different client (e.g., an user has multiple tabs open in their browser). This id is created on the client-side.
 - All messages sent to `{user}-messages` are fanout to the personal client queues. For instance, if user "rafa" has three tabs with UUIDs "fgdv2", "5h3kd" and "34jgk", a new message sent to `rafa-messages` will be distributed to `rafa-fdgv2-messages`, `rafa-5h3kd-messages` and `rafa-34jgk-messages`. This ensures all clients ultimately receive the message.
 
 ### Storing Messages
@@ -108,7 +101,7 @@ The partition key is `(from_user, to_user)`, which allows us to access messages 
 SELECT * FROM chat.messages WHERE from_user='UserA' AND to_user='UserB';
 ```
 
-As you can see, if we want to retrieve all messages of the chat, including messages from `UserB` to `UserA`, we would need to perform an additional query which can be inefficient. The issue here is that the partition keys (`from_user=UserA, to_user=UserB` and `from_user=UserB, to_user=UserA`) might reside on different nodes, making this query inefficient. Another challenge we face is the need to retrieve all chats of a user, which becomes complex when an user has multiple conversations. For example, if a user has 15 conversations, we would need to search for 30 partition keys (both for sending and receiving messages).
+As you can see, if we want to retrieve all messages of the chat, including messages from `UserB` to `UserA`, we would need to perform an additional query which can be inefficient. The issue here is that the partition keys (`from_user=UserA, to_user=UserB` and `from_user=UserB, to_user=UserA`) might reside on different nodes, making this query inefficient. Another challenge we face is the need to retrieve all chats of a user, which becomes complex when an user has multiple conversations. For example, if an user has 15 conversations, we would need to search for 30 partition keys (both for sending and receiving messages).
 
 To address this challenge, I have implemented a temporary solution that involves creating an index on both `from_user` and `to_user`. With these two queries, we can retrieve all the messages that are both sent and received by a user. Here is an example for the user `rafa`:
 
@@ -134,11 +127,11 @@ The last critical component of our prototype is enabling users to see the online
 1. **Determining Offline Status**: When should a user be considered offline?
 2. **Audience for Updates**: Who should receive these status updates?
 
-For the first question, we've implemented a heartbeat mechanism to address cases where users may briefly disconnect due to network issues. In this mechanism, each client sends a heartbeat to the **Presence Service** every 5 seconds. This action updates the "last_seen_at" value in the Cassandra key-value store. If the Presence Service has not received a heartbeat within the last 25 seconds, the user is considered offline. This approach is effective even when multiple clients are associated with the same user, as we this activity is updated based on the user's partition key.
+For the first question, I have implemented a heartbeat mechanism to address cases where users may briefly disconnect due to network issues. In this mechanism, each client sends a heartbeat to the **Presence Service** every 5 seconds. This action updates the "last_seen_at" value in the Cassandra key-value store. If the Presence Service has not received a heartbeat within the last 25 seconds, the user is considered offline. This approach is effective even when multiple clients are associated with the same user, as we this activity is updated based on the user's partition key.
 
 For the second question, we want to avoid sending status updates to all users, as it would be inefficient and a waste of resources. Similar to WhatsApp, where you only need to see one user's status at a time, I have designed our architecture so that every user has a **{user}-activity** queue. For example:
 
-Clients **rafa** with *uuid=564hd* and **novak** with *uuid=857dh* both select a chat with user **roger**. In this scenario, the following happens:
+Clients **rafa** with *uuid=564hd* and **novak** with *uuid=857dh* both select a chat with user **roger**. Now, they both want to see that status of **roger**. In this scenario, the following happens:
 
 - Users **rafa** and ************novak************ make a request to the Presence Service. It is important to note that we also identify the UUID, as clients representing the same user can be engaged in different chats.
 - Consequently, all the status updates sent to **roger-activity** by the user ************roger************ will be fanout to the queues **rafa-56hd-messages** and **novak-0857dh-messages**.
