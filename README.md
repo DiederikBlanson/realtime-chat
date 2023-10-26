@@ -8,10 +8,6 @@ In a world where chat applications like WhatsApp became the primary sources of c
 
 From the perspective of a software engineer, the challenge of designing a chat application that is not only robust but can also handle the demands of a growing user base is interesting. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
 
-**The Missing Piece**
-
-As I dived into the literature of designing scalable chat applications, I did not find many practical examples that showcases the technologies involved. While much theory can be found on this topic, practical implementations are rare. I believe that a  showcase of how these concepts come together can be valuable to engineers, enabling them to test theories, spot design vulnerabilities, and investigate optimisations.
-
 **Disclaimer**
 
 Before going into technical details, it is important to note that the application I developed is best suited for prototyping purposes. It lacks data validation and other features that are required for production environments.
