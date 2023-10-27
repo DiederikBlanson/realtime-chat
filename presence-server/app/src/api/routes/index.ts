@@ -14,6 +14,7 @@ const STATUS_CHECK_INTERVAL = 4000
 const TIMEOUT_OFFLINE_STATUS = 25000
 const offlineStatus: UserStatus = 'OFFLINE'
 const onlineStatus: UserStatus = 'ONLINE'
+const EXPIRATION_QUEUE_TIMEOUT = 30000
 
 // On every interval, we check whether users are still online. This is done by
 // querying online users, comparing their last_active_at timestamp, and verifying
@@ -152,6 +153,10 @@ router
             // Set up a unique queue for the user's subscription, which is a combination of 'uid' and 'uuid'.
             // For example: 'rafa-7667df67sf67df0-messages'.
             const uniqueQueue = `${req.body.uid}-${req.body.uuid}-messages`
+            await rabbitMQChannel.assertQueue(uniqueQueue, {
+                durable: false,
+                expires: EXPIRATION_QUEUE_TIMEOUT // Optional: Set an expiration time for the unique queue.
+            })
             await rabbitMQChannel.bindQueue(uniqueQueue, fanoutQueue, '')
 
             // TODO: If the user was previously connected to another user's status, unbind from that connection (not implemented here).
