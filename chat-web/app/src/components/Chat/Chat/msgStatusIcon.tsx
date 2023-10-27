@@ -12,7 +12,7 @@ const Component: React.FC<MsgProps> = ({ status }) => {
                 <span
                     aria-label=" In behandeling "
                     data-icon="msg-time"
-                    className="msg-status queue"
+                    className="msg-status queue queue-msg"
                 >
                     <svg
                         viewBox="0 0 16 15"
@@ -36,7 +36,7 @@ const Component: React.FC<MsgProps> = ({ status }) => {
                 <span
                     aria-label=" Verzonden "
                     data-icon="msg-check"
-                    className="msg-status"
+                    className="msg-status send-msg"
                 >
                     <svg
                         viewBox="0 0 12 11"
@@ -58,7 +58,7 @@ const Component: React.FC<MsgProps> = ({ status }) => {
                 <span
                     aria-label="Ontvangen"
                     data-icon="msg-dblcheck"
-                    className="msg-status ajgik1ph"
+                    className="msg-status received-msg"
                 >
                     <svg
                         viewBox="0 0 16 11"

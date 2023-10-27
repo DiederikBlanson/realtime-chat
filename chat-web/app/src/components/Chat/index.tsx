@@ -73,6 +73,39 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
         wsRef.current = ws
     }, [ws])
 
+    // As soon as you login, you should mark all the messages
+    // with status "SEND" mark as "RECEIVED".
+    useEffect(() => {
+        const markAsReceived = async () => {
+            const read = messages.filter(
+                (m) => m.to === name && m.status === 'SEND'
+            )
+            if (read.length === 0) return
+
+            for (let message of read) {
+                await new Promise((resolve) =>
+                    setTimeout(resolve, READ_DELAY_INTERVAL)
+                )
+                wsRef.current?.send(
+                    JSON.stringify({
+                        type: 'received',
+                        data: message
+                    })
+                )
+            }
+
+            setMessages((prevMessages) =>
+                prevMessages.map((m) => {
+                    if (m.to !== name || m.status !== 'SEND') return m
+                    m.status = 'RECEIVED'
+                    return m
+                })
+            )
+        }
+
+        markAsReceived()
+    }, [])
+
     // As soon as you select an user, all the messages that you did not read
     // will be marked as read. For now, we send them in increments of
     // 300ms as we do not want to overload the user with messages. If we do not

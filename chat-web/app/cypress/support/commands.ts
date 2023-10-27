@@ -42,3 +42,7 @@ Cypress.Commands.add('login', (user) => {
     cy.get('input').type(user)
     cy.get('button').click()
 })
+
+Cypress.Commands.add('select_chat', (user) => {
+    cy.get('#contacts').contains(user).click()
+})
