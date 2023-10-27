@@ -1,4 +1,4 @@
-describe('template spec', () => {
+describe('Send and receive messages', () => {
     it('able to connect to the websocket server', () => {
         cy.fixture('chat').then(({ sender }) => {
             cy.login(sender)
@@ -14,7 +14,7 @@ describe('template spec', () => {
         })
     })
 
-    it('able to send a chat', () => {
+    it('able to send a message', () => {
         cy.fixture('chat').then(({ sender, receiver, message }) => {
             cy.login(sender)
 
@@ -30,14 +30,14 @@ describe('template spec', () => {
         })
     })
 
-    it('able to receive a chat', () => {
+    it('able to receive a message', () => {
         cy.fixture('chat').then(({ receiver }) => {
             cy.login(receiver)
             cy.wait(2000)
         })
     })
 
-    it('able to see that someone has received it', () => {
+    it('able to see that someone has received the message', () => {
         cy.fixture('chat').then(({ sender, receiver }) => {
             cy.login(sender)
             cy.select_chat(receiver)
@@ -49,7 +49,7 @@ describe('template spec', () => {
         })
     })
 
-    it('able to read a chat', () => {
+    it('able to read a message', () => {
         cy.fixture('chat').then(({ receiver, sender, message }) => {
             cy.login(receiver)
             cy.select_chat(sender)
@@ -62,7 +62,7 @@ describe('template spec', () => {
         })
     })
 
-    it('able to see that someone has read it', () => {
+    it('able to see that someone has read the message', () => {
         cy.fixture('chat').then(({ receiver, sender }) => {
             cy.login(sender)
             cy.select_chat(receiver)

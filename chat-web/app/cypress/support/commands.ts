@@ -41,6 +41,7 @@ Cypress.Commands.add('login', (user) => {
 
     cy.get('input').type(user)
     cy.get('button').click()
+    cy.get('#main')
 })
 
 Cypress.Commands.add('select_chat', (user) => {
