@@ -181,6 +181,7 @@ const Component: React.FC<ChatProps> = ({
             </Box>
             <Box
                 display="flex"
+                className="chat-field"
                 alignItems="center"
                 bgcolor="rgb(32, 44, 51)"
                 style={{
