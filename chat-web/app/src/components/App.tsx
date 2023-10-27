@@ -18,7 +18,7 @@ const Component: React.FC = () => {
 
         // request initial data
         const f = await axios.post(
-            `${process.env.REACT_APP_MESSAGING_SERVICE_URL}/api/messages`,
+            `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`,
             {
                 name
             }
