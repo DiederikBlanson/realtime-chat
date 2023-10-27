@@ -68,7 +68,7 @@ For our prototype, I used a round-robin approach to balance the load among WebSo
 WebSocket servers can go down, making it crucial to avoid routing users to inactive servers. To tackle this challenge, the **Service Discovery DB** is created, a key-value store tracking the status of each server. Instead of directly checking server status in the Service Discovery service, the gossip protocol is implemented. In this protocol, every WebSocket server sends heartbeats at regular intervals to a random set of WebSocket servers. These servers maintain an internal data structure to track the received heartbeats. Periodically, each WebSocket server checks the latest heartbeat timestamp from the servers it received heartbeats from. If this timestamp exceeds a certain threshold (e.g., 30000ms), the WebSocket server contacts other servers to determine if the server is genuinely offline. If no other servers confirm activity, the server is considered down.
 
 ### Message queues
-Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I chose to use RabbitMQ, a queuing technology highlighted in the System Design book. Additionally, I found it straightforward to implement a running RabbitMQ cluster with NodeJS.
+Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I chose to use RabbitMQ, a queuing technology highlighted in the System Design book. Additionally, I found it straightforward to implement a running RabbitMQ cluster with NodeJS. (TODO: add picture of message flow user A to user B)
 
 It is essential to distinguish the terminologies of a "client" and a "user." A "client" refers to an user visiting the website, and a user could have multiple clients, such as in the case of multiple browser tabs. The system operates as follows when an user connects:
 
@@ -152,12 +152,139 @@ In the example above, we have logged in as **rafa**, and as a result, we can see
 
 ![Select chat](docs/prototype-3.png)
 
-In the chat interface, you will notice essential details such as when the user was last active and a record of the messages you have exchanged. Each message is accompanied by a status indicator, indicating whether the message was sent, received, or read. Now, let's proceed by receiving a message from **novak**.
+In the chat interface, you will notice essential details such as when the user was last active and a record of the messages you have exchanged. Each message has a status indicator, indicating whether the message was sent, received, or read. Now, let's proceed by receiving a message from **novak**.
 
 ![New message from novak](docs/prototype-4.png)
 
-## Bottlenecks & Optimisations (TODO)
+## Bottlenecks & Optimisations
 
+### Inefficient chat database
+As previously mentioned, the current Cassandra database structure is inefficient for several reasons:
+
+- During the initial load, a substantial number of partitions must be fetched.
+- The size of the indices might become very large.
+- Sending all historical messages to end users consumes a significant amount of bandwidth.
+
+To address these challenges, I will explore alternative approaches. The first approach involves partitioning the data for each user, ensuring that each user has all their messages in a single partition. The second approach is to implement a lazy-loading database structure, where we initially load only the most recent messages. When a user selects a specific chat, we retrieve older messages as needed.
+
+#### Approach 2 - Single partition per user for all messages
+Instead of partitioning on the <from, to> relation (1-to-1) as in Approach 1, we store all messages of an user in one partition. The table would look as follows:
+
+```sql
+CREATE TABLE IF NOT EXISTS chat.messages (
+    user text,
+    from_user text,
+    to_user text,
+    message text,
+    id text,
+    created_at timestamp,
+    PRIMARY KEY(user, created_at)
+);
+
+INSERT INTO chat.messages (user, from_user, to_user, message, id, created_at) VALUES ('rafa', 'rafa', 'roger', 'hey roger, whats going on?', '53223', toTimeStamp(now()));
+INSERT INTO chat.messages (user, from_user, to_user, message, id, created_at) VALUES ('roger', 'rafa', 'roger', 'hey roger, whats going on?', '53223', toTimeStamp(now()));
+INSERT INTO chat.messages (user, from_user, to_user, message, id, created_at) VALUES ('rafa', 'roger', 'rafa', 'hi raf! everything ok', '5764', toTimeStamp(now()));
+INSERT INTO chat.messages (user, from_user, to_user, message, id, created_at) VALUES ('rafa', 'roger', 'rafa', 'hi raf! everything ok', '5764', toTimeStamp(now()));
+
+-- get all messages;
+SELECT * FROM chat.messages WHERE user = 'rafa';
+```
+
+********Pros********
+
+- We can easily query all messages of the user ‘rafa’ that has been both send and received.
+- We only need to scan one partition as all messages are in the users partition.
+
+********Cons********
+
+- The partition keys can grow very large.
+- We have to store messages for both the sender and the receiver, increasing our storage space by 2.
+
+
+#### Approach 3 - Latest messages and on-demand fetching
+
+While we are able to retrieve the messages from the Approaches 1 and 2, it seems not to be efficient. Instead of loading all messages at the initial page load, we can retrieve the 10 (arbitrary chosen) latest conversations (1-to-1) including the latest message of that conversation. WhatsApp seems to do a similar approach, where more WS events are triggered when scrolling down in the contact list. The structure of the additional table latest_messages looks as following:
+
+```sql
+CREATE TABLE IF NOT EXISTS chat.latest_messages (
+    username text,
+    target_user text,
+    sent bigint,
+    message text,
+    id text,
+    created_at timestamp,
+    PRIMARY KEY(username, target_user)
+);
+
+INSERT INTO chat.latest_messages (username, target_user, sent, message, id, created_at) VALUES ('rafa', 'roger', 1, 'hey roger whats going on?', '53223', toTimeStamp(now()));
+INSERT INTO chat.latest_messages (username, target_user, sent, message, id, created_at) VALUES ('roger', 'rafa', 0, 'hey roger whats going on?', '53223', toTimeStamp(now()));
+
+INSERT INTO chat.latest_messages (username, target_user, sent, message, id, created_at) VALUES ('roger', 'rafa', 1, 'hey raf everything allright!', '53623', toTimeStamp(now()));
+INSERT INTO chat.latest_messages (username, target_user, sent, message, id, created_at) VALUES ('rafa', 'roger', 0, 'hey raf everything allright!', '53623', toTimeStamp(now()));
+```
+
+If we want to retrieve the 10 latest conversations from the user **rafa**, we can do this as following:
+
+```sql
+SELECT * FROM chat.latest_messages WHERE username='rafa' LIMIT 10;
+```
+
+For storing the chats, we will make a message table that is partitioned by a chat id. Every 1-to-1 chat has an unique identifier where we can directly access all messages of a conversation. The table looks as following:
+
+```sql
+CREATE TABLE IF NOT EXISTS chat.messages (
+	conversation_id uuid,
+	message_id timeuuid,
+	from_user text,
+	to_user text,
+	message text,
+	created_at timestamp,
+	PRIMARY KEY(conversation_id, message_id)
+);
+```
+
+For retrieving the X to M messages which we are used to in SQL with LIMIT and OFFSET, we cannot directly do this in Cassandra. Source https://www.codurance.com/publications/2016/04/17/sorted-pagination-in-cassandra mentions different approaches for sorted pagination. 
+
+
+####  Differences per approach
+Comparison of number of stored messages of the different approaches (Storage):
+- Approach 1: A conversation with 10 messages → 10 items stored in the database. 
+	- Also needs storage for indices.
+- Approach 2: A conversation with 10 messages → 20 items stored in the database.
+- Approach 3: A conversation with 10 messages → 10 + 2 items stored in the database.
+
+Comparison of number of stored messages of the different approaches (Writes):
+- Approach 1: 1 write to the table *************chat.messages*************
+- Approach 2: 2 writes to the table *************chat.messages*************
+- Approach 3: 3 writes to the database:
+    - 1 write to the table *******chat.messages*******
+    - 2 writes to the table **********chat.latest_messages**********
+
+
+Reads of initially loading the web-app: Comparison of the number of partitions that need to be read:
+- Approach 1: As every <from, to> key can live on a different partition, we potentially need to search for **2 * # of conversations** partitions if we want to retrieve all the messages (or the latest messages). If an user has 10 conversations, this would result in max 20 partitions (as an user can receive and send messages).
+- Approach 2: As the partition key is by the user, we need to scan **only one** partition. However, we still need to filter on the latest messages which can be computationally expensive.
+- Approach 3: **Only one partition** as we have preloaded the latest messages data in **chats.latest_messages** which can be accessed with the user_id.
+
+
+Reads of loading older messages in a 1-to-1 chat: Comparison of the number of partitions that need to be read:
+- Approach 1: As we can specifically query the <from, to> key, we only need to scan **2 partitions** for the send and received messages of a specific conversation. However, to select the latest N to M messages is difficult as we need to do a merge sort of two partitions in our application code.
+- Approach 2: There is **only partition** to be searched as we can directly retrieve all the messages of the user. However, we still need to filter on all the messages which can be computationally expensive.
+- Approach 3: **One partition** as we can directly query by the conversation_id. Furthermore, if these partitions grow very large, we can bucket them by X amount of days (Discord did this for group chats).
+
+
+
+
+
+
+
+
+
+
+
+
+
+## (TODO)
 - define what you want to investigate. you don’t have to discuss/implement everything, this can also be something for the future
 - what are the limitations like scaling? you can improve the db schema, what is effect. You can go as far as you want.
 - linear/horizontal scaling
@@ -166,6 +293,7 @@ In the chat interface, you will notice essential details such as when the user w
 - identify scaling issues in documentation (like presence server checking all users that are online whether they are still offline, we should make it more efficient)
     - also only send updates when the user was previously offline which requires a read: does this weigh up against the disadvantages?
 - maybe talk about advanced features like Push Notifications
+- Look into **token based pagination** for the chat messages
 - An interesting technique called Consistent Hashing could be a solution to these issues.
 - load balancing
     - maybe look at cpu metric instead of simple round-robin
