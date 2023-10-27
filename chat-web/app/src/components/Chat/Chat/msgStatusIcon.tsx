@@ -56,7 +56,7 @@ const Component: React.FC<MsgProps> = ({ status }) => {
         case 'RECEIVED':
             return (
                 <span
-                    aria-label=" Gelezen "
+                    aria-label="Ontvangen"
                     data-icon="msg-dblcheck"
                     className="msg-status ajgik1ph"
                 >
@@ -78,9 +78,9 @@ const Component: React.FC<MsgProps> = ({ status }) => {
         case 'READ':
             return (
                 <span
-                    aria-label=" Gelezen "
+                    aria-label="Gelezen"
                     data-icon="msg-dblcheck"
-                    className="msg-status ajgik1ph"
+                    className="msg-status read-msg"
                 >
                     <svg
                         viewBox="0 0 16 11"
