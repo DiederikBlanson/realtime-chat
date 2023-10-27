@@ -247,13 +247,13 @@ For retrieving the X to M messages which we are used to in SQL with LIMIT and OF
 
 
 ####  Differences per approach
-Comparison of number of stored messages of the different approaches (Storage):
+Comparison number of stored messages per approach (Storage):
 - Approach 1: A conversation with 10 messages → 10 items stored in the database. 
 	- Also needs storage for indices.
 - Approach 2: A conversation with 10 messages → 20 items stored in the database.
 - Approach 3: A conversation with 10 messages → 10 + 2 items stored in the database.
 
-Comparison of number of stored messages of the different approaches (Writes):
+Comparison number of writes per approach (Writes):
 - Approach 1: 1 write to the table *************chat.messages*************
 - Approach 2: 2 writes to the table *************chat.messages*************
 - Approach 3: 3 writes to the database:
@@ -262,7 +262,7 @@ Comparison of number of stored messages of the different approaches (Writes):
 
 
 Reads of initially loading the web-app: Comparison of the number of partitions that need to be read:
-- Approach 1: As every <from, to> key can live on a different partition, we potentially need to search for **2 * # of conversations** partitions if we want to retrieve all the messages (or the latest messages). If an user has 10 conversations, this would result in max 20 partitions (as an user can receive and send messages).
+- Approach 1: As every <from, to> key can reside on a different partition, we potentially need to scan **2 * # of conversations** partitions if we want to retrieve all the messages. If an user has 10 conversations, this would result in max 20 partitions (as an user can receive and send messages).
 - Approach 2: As the partition key is by the user, we need to scan **only one** partition. However, we still need to filter on the latest messages which can be computationally expensive.
 - Approach 3: **Only one partition** as we have preloaded the latest messages data in **chats.latest_messages** which can be accessed with the user_id.
 
