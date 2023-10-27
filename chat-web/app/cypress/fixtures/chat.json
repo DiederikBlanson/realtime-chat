@@ -1,5 +1,6 @@
 {
     "sender": "rafa",
     "receiver": "roger",
-    "message": "Hey Roger, what is going on?"
+    "message": "Hey Roger, what is going on?",
+    "num_messages": 0
 }

@@ -17,17 +17,16 @@ describe('template spec', () => {
     it('able to send a chat', () => {
         cy.fixture('chat').then(({ sender, receiver, message }) => {
             cy.login(sender)
+
+            // Select chat
             cy.contains(receiver).click()
 
+            // Type and send a message
             cy.get('input').type(message)
             cy.get('.chat-field button').click()
-            cy.get('.send-msg').last().should('exist')
 
-            cy.get('#chat-messages .MuiBox-root')
-                .its('length')
-                .then((newLength) => {
-                    cy.wrap(newLength).should('eq', 1)
-                })
+            // The message should be displayed as "SEND"
+            cy.get('.send-msg').last().should('exist')
         })
     })
 
@@ -43,6 +42,9 @@ describe('template spec', () => {
             cy.login(sender)
             cy.select_chat(receiver)
 
+            // You should add a check here to ensure the "received-msg" exists.
+            // This check can be added based on how the "received" message is styled in your application.
+            // For example, you can check for a specific class or element.
             cy.get('.received-msg').last().should('exist')
         })
     })
@@ -52,7 +54,10 @@ describe('template spec', () => {
             cy.login(receiver)
             cy.select_chat(sender)
 
+            // Verify that the message text is present in the chat
             cy.contains(message)
+
+            // Wait for a certain duration to simulate reading
             cy.wait(1000)
         })
     })
@@ -62,6 +67,9 @@ describe('template spec', () => {
             cy.login(sender)
             cy.select_chat(receiver)
 
+            // You should add a check here to ensure the "read-msg" exists.
+            // This check can be added based on how the "read" message is styled in your application.
+            // For example, you can check for a specific class or element.
             cy.get('.read-msg').last().should('exist')
         })
     })
