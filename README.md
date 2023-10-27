@@ -13,6 +13,7 @@ I will define our project's scope and requirements, sketch out a high-level syst
 
 Before going into technical details, it is important to note that the application I developed is best suited for prototyping purposes. It lacks data validation and other features that are required for production environments.
 
+<br/><br/>
 ## Scope
 
 In this project I focus on the core components required for a functional prototype of a simple chat system. It is not my goal to create advanced features for the end users, but instead focus more on availability and scalability of the whole system.
@@ -33,6 +34,7 @@ In this project I focus on the core components required for a functional prototy
 - High availability, ensuring a good chat experience.
 - Scalability that can effortlessly tackle increasing system load.
 
+<br/><br/>
 ## Technical design
 
 Building a scalable chat application involves a set of design and technological choices. In this chapter, I will discuss each component in our architecture that addresses the core challenges of scalability and real-time communication.
@@ -156,9 +158,9 @@ In the chat interface, you will notice essential details such as when the user w
 
 ![New message from novak](docs/prototype-4.png)
 
-## Bottlenecks & Optimisations
+<br/><br/>
+## Bottlenecks & Optimisations: Inefficient chat database
 
-### Inefficient chat database
 As previously mentioned, the current Cassandra database structure is inefficient for several reasons:
 
 - During the initial load, a substantial number of partitions must be fetched.
@@ -167,7 +169,8 @@ As previously mentioned, the current Cassandra database structure is inefficient
 
 To address these challenges, I will explore alternative approaches. The first approach involves partitioning the data for each user, ensuring that each user has all their messages in a single partition. The second approach is to implement a lazy-loading database structure, where we initially load only the most recent messages. When a user selects a specific chat, we retrieve older messages as needed.
 
-#### Approach 2 - Single partition per user for all messages
+
+### Approach 2 - Single partition per user for all messages
 Instead of partitioning on the <from, to> relation (1-to-1) as in Approach 1, we store all messages of an user in one partition. The table would look as follows:
 
 ```sql
@@ -201,7 +204,7 @@ SELECT * FROM chat.messages WHERE user = 'rafa';
 - We have to store messages for both the sender and the receiver, increasing our storage space by 2.
 
 
-#### Approach 3 - Latest messages and on-demand fetching
+### Approach 3 - Latest messages and on-demand fetching
 
 While we are able to retrieve the messages from the Approaches 1 and 2, it seems not to be efficient. Instead of loading all messages at the initial page load, we can retrieve the 10 (arbitrary chosen) latest conversations (1-to-1) including the latest message of that conversation. WhatsApp seems to do a similar approach, where more WS events are triggered when scrolling down in the contact list. The structure of the additional table latest_messages looks as following:
 
@@ -246,7 +249,7 @@ CREATE TABLE IF NOT EXISTS chat.messages (
 For retrieving the X to M messages which we are used to in SQL with LIMIT and OFFSET, we cannot directly do this in Cassandra. Source https://www.codurance.com/publications/2016/04/17/sorted-pagination-in-cassandra mentions different approaches for sorted pagination. 
 
 
-####  Differences per approach
+###  Differences per approach
 Comparison number of stored messages per approach (Storage):
 - Approach 1: A conversation with 10 messages → 10 items stored in the database. 
 	- Also needs storage for indices.
@@ -271,29 +274,3 @@ Reads of loading older messages in a 1-to-1 chat: Comparison of the number of pa
 - Approach 1: As we can specifically query the <from, to> key, we only need to scan **2 partitions** for the send and received messages of a specific conversation. However, to select the latest N to M messages is difficult as we need to do a merge sort of two partitions in our application code.
 - Approach 2: There is **only partition** to be searched as we can directly retrieve all the messages of the user. However, we still need to filter on all the messages which can be computationally expensive.
 - Approach 3: **One partition** as we can directly query by the conversation_id. Furthermore, if these partitions grow very large, we can bucket them by X amount of days (Discord did this for group chats).
-
-
-
-
-
-
-
-
-
-
-
-
-
-## (TODO)
-- define what you want to investigate. you don’t have to discuss/implement everything, this can also be something for the future
-- what are the limitations like scaling? you can improve the db schema, what is effect. You can go as far as you want.
-- linear/horizontal scaling
-- Although the book by Alex Xu mentions that might want to do a fanout for group messages (which is out of scope for now), this might also not be relevant for WhatsApp.
-- caching https://www.youtube.com/watch?v=dGAgxozNWFE&t=269s
-- identify scaling issues in documentation (like presence server checking all users that are online whether they are still offline, we should make it more efficient)
-    - also only send updates when the user was previously offline which requires a read: does this weigh up against the disadvantages?
-- maybe talk about advanced features like Push Notifications
-- Look into **token based pagination** for the chat messages
-- An interesting technique called Consistent Hashing could be a solution to these issues.
-- load balancing
-    - maybe look at cpu metric instead of simple round-robin
