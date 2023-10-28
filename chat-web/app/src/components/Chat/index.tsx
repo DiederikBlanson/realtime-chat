@@ -170,7 +170,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
     // try retrieving a new WebSocket server in intervals of 1000ms.
     const connectWebSocket = async () => {
         const sd = await fetch(
-            `${process.env.REACT_APP_SERVICE_DISCOVERY_URL}/api/ws-server`
+            `${import.meta.env.VITE_APP_SERVICE_DISCOVERY_URL}/api/ws-server`
         )
         const { ws: wsServer } = await sd.json()
         const newWs = new WebSocket(
@@ -201,7 +201,9 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
         // Define an asynchronous function to fetch status updates for the selected user.
         const update = async () => {
             const d = await axios.post(
-                `${process.env.REACT_APP_PRESENCE_URL}/api/subscribe-to-other`,
+                `${
+                    import.meta.env.VITE_APP_PRESENCE_URL
+                }/api/subscribe-to-other`,
                 {
                     uid,
                     uuid,
@@ -233,7 +235,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
                 return
 
             await axios.post(
-                `${process.env.REACT_APP_PRESENCE_URL}/api/heartbeat`,
+                `${import.meta.env.VITE_APP_PRESENCE_URL}/api/heartbeat`,
                 {
                     uid
                 }
