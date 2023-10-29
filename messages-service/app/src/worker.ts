@@ -8,11 +8,11 @@ export const startWorker = async () => {
     const rabbitMQConnection = await amqp.connect('amqp://localhost')
     const rabbitMQChannel = await rabbitMQConnection.createChannel()
 
-    const userQueue = `messaging-service-worker`
-    await rabbitMQChannel.assertQueue(userQueue, { durable: false })
+    const workerQueue = `messaging-service-worker`
+    await rabbitMQChannel.assertQueue(workerQueue, { durable: false })
 
     rabbitMQChannel.consume(
-        userQueue,
+        workerQueue,
         async (message: ConsumeMessage | null) => {
             if (message === null) return
             const msg = JSON.parse(message.content.toString()) as WSRes
