@@ -9,13 +9,7 @@ import {
     WSRead
 } from '@shared/types'
 import { CustomWebSocket } from './types'
-import cassandra from 'cassandra-driver'
 
-const client = new cassandra.Client({
-    contactPoints: ['127.0.0.1'],
-    localDataCenter: 'datacenter1',
-    keyspace: 'chat'
-})
 const EXPIRATION_QUEUE_TIMEOUT = 30000
 
 export const handleWebSocketConnection = async (
@@ -146,15 +140,9 @@ export const handleWebSocketConnection = async (
         )
 
         // Store the message in the database.
-        await client.execute(
-            "INSERT INTO chat.messages (from_user, to_user, message, id, status, created_at) VALUES (?, ?, ?, ?, 'SEND', ?)",
-            [
-                parseBuffer.from.toString(),
-                parseBuffer.to.toString(),
-                parseBuffer.text.toString(),
-                parseBuffer.id.toString(),
-                new Date(parseBuffer.timestamp)
-            ]
+        await rabbitMQChannel.sendToQueue(
+            `messaging-service-worker`,
+            Buffer.from(JSON.stringify(msg_receiver))
         )
     }
 
@@ -173,13 +161,9 @@ export const handleWebSocketConnection = async (
         )
 
         // Update the message status in the database to 'RECEIVED'.
-        await client.execute(
-            `UPDATE chat.messages SET status = 'RECEIVED' WHERE from_user = ? AND to_user = ? AND id = ?`,
-            [
-                parseBuffer.from.toString(),
-                parseBuffer.to.toString(),
-                parseBuffer.id.toString()
-            ]
+        await rabbitMQChannel.sendToQueue(
+            `messaging-service-worker`,
+            Buffer.from(JSON.stringify(msg))
         )
     }
 
@@ -203,13 +187,10 @@ export const handleWebSocketConnection = async (
             `${msg.data.from}-messages`,
             Buffer.from(JSON.stringify(msg))
         )
-        await client.execute(
-            `UPDATE chat.messages SET status = 'READ' WHERE from_user = ? AND to_user = ? AND id = ?`,
-            [
-                parseBuffer.from.toString(),
-                parseBuffer.to.toString(),
-                parseBuffer.id.toString()
-            ]
+
+        await rabbitMQChannel.sendToQueue(
+            `messaging-service-worker`,
+            Buffer.from(JSON.stringify(msg))
         )
     }
 
