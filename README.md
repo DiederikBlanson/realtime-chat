@@ -57,7 +57,7 @@ Our technical architecture is a set of interconnected components, each playing a
 - **Presence DB**: The status of each user is stored in a Cassandra database.
 
 ### A functional chat
-I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React (Vite) due to its familiarity and the speed it offers for building interfaces. 
+I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React (Vite) due to my familiarity with the framework and the speed it offers for building interfaces, with Cypress for E2E-testing of chat functionalities. 
 
 WebSockets emerged as the communication method of choice. Their persistent, bidirectional connection enables efficient data exchange between clients and the server. While various WebSocket libraries exist, I opted for the native JavaScript WebSocket module for simplicity. One drawback of the native approach is the absence of automatic reconnection to the WebSocket server. As a solution, the client attempts to reconnect every 1000ms when the connection is lost.
 
