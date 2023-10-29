@@ -1,6 +1,5 @@
 import express from 'express'
 import { Request, Response, NextFunction } from 'express'
-import clear from 'clear'
 
 const router = express.Router()
 const Redis = require('ioredis')
@@ -9,19 +8,6 @@ const redis = new Redis({
     port: process.env.REDIS_PORT
 })
 var i = 0
-
-/* This is purely for demostration purposes, as we can see the live status of the different
-web servers */
-setInterval(async () => {
-    clear()
-    const servers = await redis.keys('localhost:*')
-    console.log('server \t \t | status')
-    console.log('--------------------------')
-    for (let server of servers) {
-        const result = await redis.get(server)
-        console.log(`${server} \t | ${result}`)
-    }
-}, 1000)
 
 router
     .route('/ws-server')

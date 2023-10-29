@@ -6,6 +6,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import http from 'http'
+import { startWorker } from './worker' // Import the startWorker function
 
 const app = express()
 const port = process.env.PORT || 5678
@@ -30,6 +31,9 @@ app.get('/health-check', (req, res, next) =>
 app.get('*', (req, res) =>
     res.status(404).send('404. This endpoint does not exist:')
 )
+
+// Start the worker before creating the HTTP server
+startWorker()
 
 // Create an HTTP server
 const server = http.createServer(app)
