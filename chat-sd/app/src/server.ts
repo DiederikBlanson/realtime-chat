@@ -1,6 +1,7 @@
 import express from 'express'
 // @ts-ignore
 import api from './api/routes'
+import { statusLogger } from './statusLogger'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import bodyParser from 'body-parser'
@@ -30,6 +31,8 @@ app.get('/health-check', (req, res, next) =>
 app.get('*', (req, res) =>
     res.status(404).send('404. This endpoint does not exist:')
 )
+
+setInterval(statusLogger, 1000)
 
 // Create an HTTP server
 const server = http.createServer(app)
