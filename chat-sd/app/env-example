@@ -1,0 +1,4 @@
+PORT=1234
+FRONTEND_URL=http://localhost:3000
+REDIS_HOST=localhost
+REDIS_PORT=6379
