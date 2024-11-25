@@ -25,7 +25,8 @@ sh redis/setup-redis.sh
 **Step 3:**  Open Terminal 3 and execute the following command to start the Cassandra cluster:
 
 ```bash
-sh cassandra/setup-cassandra.sh
+cd cassandra
+sh setup-cassandra.sh
 ```
 
 
@@ -63,6 +64,14 @@ You can add more WebSocket servers by running PORT={other_port} npm run dev in a
 
 ```bash
 cd chat-web/app
+npm install
+npm start
+```
+
+**Step 9:** Finally, open Terminal 8 and run the following commands to start the presence server.
+
+```bash
+cd presence-server/app
 npm install
 npm start
 ```
