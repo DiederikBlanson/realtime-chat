@@ -32,7 +32,7 @@ app.get('*', (req, res) =>
     res.status(404).send('404. This endpoint does not exist:')
 )
 
-setInterval(statusLogger, 1000)
+// setInterval(statusLogger, 1000)
 
 // Create an HTTP server
 const server = http.createServer(app)

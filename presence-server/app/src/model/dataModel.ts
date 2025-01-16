@@ -2,7 +2,7 @@ import cassandra from 'cassandra-driver'
 import { UserStatus } from '@shared/types'
 
 const client = new cassandra.Client({
-    contactPoints: ['127.0.0.1'],
+    contactPoints: [process.env.CASSANDRA_POINT],
     localDataCenter: 'datacenter1',
     keyspace: 'presence'
 })

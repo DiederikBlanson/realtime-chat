@@ -24,8 +24,8 @@ export default class Gossip {
     constructor() {
         this.SERVER_HOST = `localhost:${process.env.PORT}`
         this.redis = new Redis({
-            host: 'localhost',
-            port: 6379
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT
         })
         this.initializeWS()
     }

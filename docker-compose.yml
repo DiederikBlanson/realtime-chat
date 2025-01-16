@@ -1,0 +1,126 @@
+version: "3.8"
+
+services:
+  redis-container:
+    image: redis:latest
+    container_name: redis-container
+    networks:
+      - chat_network
+    ports:
+      - "6379:6379"
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    networks:
+      - chat_network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra
+    networks:
+      - chat_network
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    environment:
+      - CASSANDRA_USER=admin
+      - CASSANDRA_PASSWORD=admin
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+
+  chat-sd:
+    image: chat-sd
+    container_name: chat-sd
+    networks:
+      - chat_network
+    ports:
+      - "8888:8888"
+    environment:
+      - FRONTEND_URL=http://localhost:3000
+      - REDIS_HOST=redis-container
+      - REDIS_PORT=6379
+    depends_on:
+      - redis-container
+      - cassandra
+    restart: always
+
+  messages-service:
+    image: messages-service
+    container_name: messages-service
+    networks:
+      - chat_network
+    ports:
+      - "5678:5678"
+    environment:
+      - FRONTEND_URL=http://localhost:3000
+      - RABBITMQ_URL=amqp://rabbitmq
+      - CASSANDRA_POINT=cassandra
+    depends_on:
+      - redis-container
+      - cassandra
+    restart: always
+
+  chat-ws:
+    image: chat-ws
+    container_name: chat-ws
+    networks:
+      - chat_network
+    ports:
+      - "4321:4321"
+    environment:
+      - SERVER_HOST=http://localhost:7777
+      - REDIS_HOST=redis-container
+      - REDIS_PORT=6379
+      - PORT=4321
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      - redis-container
+      - cassandra
+    restart: always
+
+  chat-web:
+    image: chat-web
+    container_name: chat-web
+    networks:
+      - chat_network
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
+      - VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
+      - VITE_APP_PRESENCE_URL=http://localhost:7777
+    depends_on:
+      - chat-sd
+      - messages-service
+      - chat-ws
+      - presence-server
+    restart: always
+
+  presence-server:
+    image: presence-server
+    container_name: presence-server
+    networks:
+      - chat_network
+    ports:
+      - "7777:7777"
+    environment:
+      - FRONTEND_URL=http://localhost:3000
+      - RABBITMQ_URL=amqp://rabbitmq
+      - CASSANDRA_POINT=cassandra
+    depends_on:
+      - redis-container
+      - cassandra
+    restart: always
+
+networks:
+  chat_network:
+    driver: bridge
+
+volumes:
+  cassandra-data:
