@@ -62,7 +62,7 @@ docker run \
     -d \
     -e FRONTEND_URL=http://localhost:3000 \
     -e RABBITMQ_URL=amqp://rabbitmq \
-    -E CASSANDRA_POINT=cassandra \
+    -e CASSANDRA_POINT=cassandra \
     --network chat_network \
     messages-service
 ```
