@@ -61,6 +61,8 @@ docker run \
     -p 5678:5678 \
     -d \
     -e FRONTEND_URL=http://localhost:3000 \
+    -e RABBITMQ_URL=amqp://rabbitmq \
+    -E CASSANDRA_POINT=cassandra \
     --network chat_network \
     messages-service
 ```
@@ -84,6 +86,7 @@ docker run \
     -e REDIS_HOST=redis-container \
     -e REDIS_PORT=6379 \
     -e PORT=4321 \
+    -e RABBITMQ_URL=amqp://rabbitmq \
     --network chat_network \
     chat-ws
 ```
@@ -128,6 +131,8 @@ docker run \
     -p 7777:7777 \
     -d \
     -e FRONTEND_URL=http://localhost:3000 \
+    -e RABBITMQ_URL=amqp://rabbitmq \
+    -e CASSANDRA_POINT=cassandra \
     --network chat_network \
     presence-server
 ```

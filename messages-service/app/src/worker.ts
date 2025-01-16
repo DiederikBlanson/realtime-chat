@@ -5,7 +5,9 @@ import DataModel from './model/dataModel'
 const dataModel = new DataModel()
 
 export const startWorker = async () => {
-    const rabbitMQConnection = await amqp.connect('amqp://rabbitmq') // CTODO: create env variable
+    const rabbitMQConnection = await amqp.connect(
+        process.env.RABBITMQ_URL as string
+    )
     const rabbitMQChannel = await rabbitMQConnection.createChannel()
 
     const workerQueue = `messaging-service-worker`

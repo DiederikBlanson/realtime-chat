@@ -9,7 +9,7 @@ const redis = new Redis({
 web servers */
 export const statusLogger = async () => {
     clear()
-    const servers = await redis.keys('localhost:*') // CTODO
+    const servers = await redis.keys('localhost:*')
     console.log('server \t \t | status')
     console.log('--------------------------')
     for (let server of servers) {

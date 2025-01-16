@@ -23,7 +23,7 @@ router
 
             // Establish a connection to RabbitMQ for messaging.
             const rabbitMQConnection = await amqp.connect(
-                "amqp://rabbitmq" // CTODO: create env variable
+                process.env.RABBITMQ_URL as string
             )
             const rabbitMQChannel = await rabbitMQConnection.createChannel()
 
@@ -65,7 +65,7 @@ router
 
             // Establish a connection to RabbitMQ for messaging.
             const rabbitMQConnection = await amqp.connect(
-                "amqp://rabbitmq" // CTODO: create env variable
+                process.env.RABBITMQ_URL as string
             )
             const rabbitMQChannel = await rabbitMQConnection.createChannel()
 

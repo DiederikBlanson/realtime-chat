@@ -13,7 +13,7 @@ router
     .route('/ws-server')
     .get(async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const servers = await redis.keys('localhost:*') // CTODO
+            const servers = await redis.keys('localhost:*')
             const max_attempts = servers.length
             var attempt = 0
 

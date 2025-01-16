@@ -59,6 +59,8 @@ services:
       - "5678:5678"
     environment:
       - FRONTEND_URL=http://localhost:3000
+      - RABBITMQ_URL=amqp://rabbitmq
+      - CASSANDRA_POINT=cassandra
     depends_on:
       - redis-container
       - cassandra
@@ -76,6 +78,7 @@ services:
       - REDIS_HOST=redis-container
       - REDIS_PORT=6379
       - PORT=4321
+      - RABBITMQ_URL=amqp://rabbitmq
     depends_on:
       - redis-container
       - cassandra
@@ -108,6 +111,8 @@ services:
       - "7777:7777"
     environment:
       - FRONTEND_URL=http://localhost:3000
+      - RABBITMQ_URL=amqp://rabbitmq
+      - CASSANDRA_POINT=cassandra
     depends_on:
       - redis-container
       - cassandra

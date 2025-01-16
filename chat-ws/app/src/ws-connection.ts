@@ -26,7 +26,7 @@ export const handleWebSocketConnection = async (
 
     // Establishing a connection to RabbitMQ and setting up communication channels.
     const rabbitMQConnection = await amqp.connect(
-        "amqp://rabbitmq" // CTODO: create env variable
+        process.env.RABBITMQ_URL as string
     )
     const rabbitMQChannel = await rabbitMQConnection.createChannel()
 

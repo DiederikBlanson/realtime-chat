@@ -1,7 +1,7 @@
 import cassandra from 'cassandra-driver'
 import { Message } from '@shared/types'
 const client = new cassandra.Client({
-    contactPoints: ['cassandra'], // CTODO: create env variable
+    contactPoints: [process.env.CASSANDRA_POINT],
     localDataCenter: 'datacenter1',
     keyspace: 'chat'
 })
