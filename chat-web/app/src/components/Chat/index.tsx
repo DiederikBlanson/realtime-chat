@@ -110,7 +110,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
     // will be marked as read. For now, we send them in increments of
     // 300ms as we do not want to overload the user with messages. If we do not
     // wait 300ms (or similar), many state updates wont be performed on the other user side, resulting
-    // in them not seeing that you have read the messages. This needs to be optimized
+    // in them not seeing that you have read the messages. This needs to be optimized by making a bulk call.
     const READ_DELAY_INTERVAL = 100
     useEffect(() => {
         convIdRef.current = convId

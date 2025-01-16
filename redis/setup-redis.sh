@@ -1,4 +1,6 @@
-sudo kill -9 $(sudo lsof -t -i :6379)
-
-sleep 5
-redis-server
+docker run \
+  --name redis-container \
+  --network chat_network \
+  -p 6379:6379 \
+  -d \
+  redis:latest

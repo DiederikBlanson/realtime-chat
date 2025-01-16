@@ -13,7 +13,7 @@ router
     .route('/ws-server')
     .get(async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const servers = await redis.keys('localhost:*')
+            const servers = await redis.keys('localhost:*') // CTODO
             const max_attempts = servers.length
             var attempt = 0
 
@@ -37,6 +37,7 @@ router
             return res.status(500).send('No server available!!')
         } catch (e) {
             console.log(e)
+            return res.status(500).send(e)
         }
     })
 

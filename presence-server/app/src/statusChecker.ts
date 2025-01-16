@@ -19,7 +19,7 @@ export const statusChecker = async () => {
 
     // Establish a connection to RabbitMQ for messaging.
     const rabbitMQConnection = await amqp.connect(
-        process.env.RABBITMQ_URL as string
+        "amqp://rabbitmq" // CTODO: create env variable
     )
     const rabbitMQChannel = await rabbitMQConnection.createChannel()
 
