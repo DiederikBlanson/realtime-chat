@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-ws
+spec:
+  selector:
+    app: chat-ws  # Match the label from the Deployment
+  ports:
+    - name: ws-port
+      protocol: TCP
+      port: 4321  # External port for accessing chat-ws service
+      targetPort: 4321  # The internal port that chat-ws is listening on
+  type: ClusterIP  # Use ClusterIP for internal communication, or change to NodePort/LoadBalancer if needed

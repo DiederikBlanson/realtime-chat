@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-ws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-ws
+  template:
+    metadata:
+      labels:
+        app: chat-ws
+    spec:
+      containers:
+        - name: chat-ws
+          image: dedder98/chat-ws  # Use your chat-ws image
+          ports:
+            - containerPort: 4321  # Expose port 4321
+          env:
+            - name: SERVER_HOST
+              value: "http://localhost:7777"  # Frontend service URL
+            - name: REDIS_HOST
+              value: "redis-container"  # Redis service name
+            - name: REDIS_PORT
+              value: "6379"  # Redis port
+            - name: PORT
+              value: "4321"  # Port the service listens on
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq"  # RabbitMQ service URL

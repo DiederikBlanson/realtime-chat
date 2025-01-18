@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-web
+spec:
+  replicas: 1  # Change this based on your desired number of pods
+  selector:
+    matchLabels:
+      app: chat-web
+  template:
+    metadata:
+      labels:
+        app: chat-web
+    spec:
+      containers:
+        - name: chat-web
+          image: dedder98/chat-web  # Your Docker image
+          ports:
+            - containerPort: 80  # The port inside the container (80 is typical for web apps)
+          env:
+            - name: VITE_APP_SERVICE_DISCOVERY_URL
+              value: "http://localhost:8888"
+            - name: VITE_APP_MESSAGING_SERVICE_URL
+              value: "http://localhost:5678"
+            - name: VITE_APP_PRESENCE_URL
+              value: "http://localhost:7777"
