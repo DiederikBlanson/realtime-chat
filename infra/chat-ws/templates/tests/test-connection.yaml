@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "chat-ws.fullname" . }}-test-connection"
+  labels:
+    {{- include "chat-ws.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "chat-ws.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

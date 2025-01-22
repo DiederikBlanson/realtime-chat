@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-presence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-presence
+  template:
+    metadata:
+      labels:
+        app: chat-presence
+    spec:
+      containers:
+        - name: chat-presence
+          image: dedder98/chat-presence  # Use your chat-presence image
+          ports:
+            - containerPort: 7777  # Expose port 7777
+          env:
+            - name: FRONTEND_URL
+              value: "http://localhost:3000"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq"  # Assuming rabbitmq service name is 'rabbitmq'
+            - name: CASSANDRA_POINT
+              value: "cassandra"  # Assuming Cassandra service name is 'cassandra'

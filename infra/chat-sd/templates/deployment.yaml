@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-sd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-sd
+  template:
+    metadata:
+      labels:
+        app: chat-sd
+    spec:
+      containers:
+        - name: chat-sd
+          image: dedder98/chat-sd
+          ports:
+            - containerPort: 8888
+          env:
+            - name: FRONTEND_URL
+              value: "http://localhost:3000"
+            - name: REDIS_HOST
+              value: "redis-container"
+            - name: REDIS_PORT
+              value: "6379"

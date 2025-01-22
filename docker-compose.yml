@@ -50,9 +50,9 @@ services:
       - cassandra
     restart: always
 
-  messages-service:
-    image: messages-service
-    container_name: messages-service
+  chat-messages:
+    image: chat-messages
+    container_name: chat-messages
     networks:
       - chat_network
     ports:
@@ -97,14 +97,14 @@ services:
       - VITE_APP_PRESENCE_URL=http://localhost:7777
     depends_on:
       - chat-sd
-      - messages-service
+      - chat-messages
       - chat-ws
-      - presence-server
+      - chat-presence
     restart: always
 
-  presence-server:
-    image: presence-server
-    container_name: presence-server
+  chat-presence:
+    image: chat-presence
+    container_name: chat-presence
     networks:
       - chat_network
     ports:

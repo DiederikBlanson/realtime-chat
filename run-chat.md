@@ -64,7 +64,7 @@ docker run \
     -e RABBITMQ_URL=amqp://rabbitmq \
     -e CASSANDRA_POINT=cassandra \
     --network chat_network \
-    messages-service
+    chat-messages
 ```
 
 ---
@@ -119,7 +119,7 @@ docker run \
 **Step 10:** Finally, open Terminal 8 and run the following commands to start the presence server.
 
 ```bash
-cd presence-server/app
+cd chat-presence/app
 npm install
 npm run dev
 ```
@@ -134,7 +134,7 @@ docker run \
     -e RABBITMQ_URL=amqp://rabbitmq \
     -e CASSANDRA_POINT=cassandra \
     --network chat_network \
-    presence-server
+    chat-presence
 ```
 
 ---
