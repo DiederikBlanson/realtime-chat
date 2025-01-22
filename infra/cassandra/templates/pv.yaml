@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cassandra-data-pv  # Name of the persistent volume
+spec:
+  capacity:
+    storage: 1Gi  # Size of the storage
+  accessModes:
+    - ReadWriteOnce  # Access mode matching the PVC
+  persistentVolumeReclaimPolicy: Retain  # Keeps the PV even after PVC is deleted
+  storageClassName: standard  # Matches the PVC storage class if specified
+  hostPath:
+    path: "/mnt/cassandra-data"
