@@ -1,3 +1,4 @@
+pkill -f "kubectl port-forward"
 kubectl port-forward svc/cassandra 9042:9042 9160:9160 & \
 kubectl port-forward svc/redis-container 6379:6379 & \
 kubectl port-forward svc/rabbitmq 5672:5672 15672:15672 & \
