@@ -1,7 +1,11 @@
 import cassandra from 'cassandra-driver'
 import { Message } from '@shared/types'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
 const client = new cassandra.Client({
-    contactPoints: [process.env.CASSANDRA_POINT],
+    contactPoints: [process.env.CASSANDRA_POINT as string],
     localDataCenter: 'datacenter1',
     keyspace: 'chat'
 })

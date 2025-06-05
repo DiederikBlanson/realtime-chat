@@ -1,7 +1,7 @@
 import express from 'express'
 // @ts-ignore
 import api from './api/routes'
-import { statusLogger } from './statusLogger'
+// import { statusLogger } from './statusLogger'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import bodyParser from 'body-parser'

@@ -1,6 +1,9 @@
 import amqp, { ConsumeMessage } from 'amqplib'
 import { WSRes, Message } from '@shared/types'
 import DataModel from './model/dataModel'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const dataModel = new DataModel()
 
