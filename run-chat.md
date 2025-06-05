@@ -43,6 +43,14 @@ sh setup-cassandra.sh
 **Step 6:**  Open Terminal 4 and run the following commands to start the chat application:
 
 ```bash
+cd chat-sd/app
+npm install
+npm run dev
+```
+
+or
+
+```bash
 docker run \
     -p 8888:8888 \
     -d \
@@ -55,6 +63,14 @@ docker run \
 
 ---
 **Step 7:**  Open Terminal 5 and run the following commands to start the messages service:
+
+```bash
+cd chat-messages/app
+npm install
+npm run dev
+```
+
+or
 
 ```bash
 docker run \
