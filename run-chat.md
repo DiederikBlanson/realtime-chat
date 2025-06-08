@@ -53,7 +53,6 @@ or
 ```bash
 docker run \
     -p 8888:8888 \
-    -d \
     -e FRONTEND_URL=http://localhost:3000 \
     -e REDIS_HOST=redis-container \
     -e REDIS_PORT=6379 \
@@ -75,7 +74,6 @@ or
 ```bash
 docker run \
     -p 5678:5678 \
-    -d \
     -e FRONTEND_URL=http://localhost:3000 \
     -e RABBITMQ_URL=amqp://rabbitmq \
     -e CASSANDRA_POINT=cassandra \
@@ -97,7 +95,6 @@ or
 ```bash
 docker run \
     -p 4321:4321 \
-    -d \
     -e SERVER_HOST=http://localhost:7777 \
     -e REDIS_HOST=redis-container \
     -e REDIS_PORT=6379 \
@@ -123,16 +120,16 @@ or
 ```bash
 docker run \
     -p 3000:80 \
-    -d \
     -e VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888 \
     -e VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678 \
     -e VITE_APP_PRESENCE_URL=http://localhost:7777 \
+    -e VITE_APP_FEDERATED_GRAPH=http://localhost:4000 \
     --network chat_network \
     chat-web
 ```
 
 ---
-**Step 10:** Finally, open Terminal 8 and run the following commands to start the presence server.
+**Step 10:** Open Terminal 8 and run the following commands to start the presence server.
 
 ```bash
 cd chat-presence/app
@@ -145,12 +142,30 @@ or
 ```bash
 docker run \
     -p 7777:7777 \
-    -d \
     -e FRONTEND_URL=http://localhost:3000 \
     -e RABBITMQ_URL=amqp://rabbitmq \
     -e CASSANDRA_POINT=cassandra \
     --network chat_network \
     chat-presence
+```
+
+---
+**Step 11:** Finally, run the Federated Graph with the following commands:
+
+```bash
+cd mesh
+npx mesh-compose -o supergraph.graphql
+npx hive-gateway supergraph
+```
+
+or
+
+```bash
+docker run \
+    -p 4000:4000 \
+    -e MESSAGING_SERVICE_URL=http://localhost:5678 \
+    --network chat_network \
+    mesh
 ```
 
 ---

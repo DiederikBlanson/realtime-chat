@@ -4,6 +4,32 @@ import { Message } from '@shared/types'
 import Chat from './Chat'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
+import {client} from "../graphql/connect"
+import { MessagesDocument } from '../graphql/generated/graphql'
+
+const useGraph = import.meta.env.VITE_APP_ENABLE_GRAPH == "true"
+
+const getMessages = async (name: string) => {
+    if (useGraph){
+        const q = await client.query({
+            query: MessagesDocument,
+            variables: {
+                name: name,
+            }
+        })
+
+        // Read-only so copy the response. Source: https://github.com/apollographql/apollo-client/issues/3255
+        return JSON.parse(JSON.stringify(q.data.messages))
+    } else {
+        const f = await axios.post(
+            `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`, {
+                name
+            }
+        )
+
+        return f.data.messages
+    }
+}
 
 const Component: React.FC = () => {
     const [isLogged, setLogged] = useState(false) // TODO: we can merge most data objects and put it in one state. and only keep the islogged/isloading separate
@@ -16,14 +42,8 @@ const Component: React.FC = () => {
         const data = new FormData(event.currentTarget)
         const name = data.get('username') as string
 
-        // request initial data
-        const f = await axios.post(
-            `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`,
-            {
-                name
-            }
-        )
-        const { messages } = f.data
+        const messages = await getMessages(name)
+
         setName(data.get('username') as string)
         setUUID(uuidv4())
         setLogged(true)

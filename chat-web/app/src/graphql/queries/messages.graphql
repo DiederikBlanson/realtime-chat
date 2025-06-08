@@ -1,0 +1,10 @@
+query Messages($name: String!) {
+    messages(name: $name) {
+        from
+        id
+        status
+        text
+        timestamp
+        to
+    }
+}

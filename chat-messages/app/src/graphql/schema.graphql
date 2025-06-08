@@ -1,0 +1,22 @@
+scalar Date
+
+type Query {
+    messages(name: String!): [Message!]!
+}
+
+enum MessageStatus {
+    QUEUE
+    AWAITING
+    SEND
+    RECEIVED
+    READ
+}
+
+type Message {
+    id: ID!
+    text: String!
+    from: String!
+    to: String!
+    status: MessageStatus!
+    timestamp: Date!
+}

@@ -1,5 +1,8 @@
 import axios from 'axios'
 import Redis from 'ioredis'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 interface Membership {
     lastIncreased: Date | undefined

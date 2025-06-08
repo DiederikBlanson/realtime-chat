@@ -41,12 +41,13 @@ Building a scalable chat application involves a set of design and technological 
 
 ### Technical Architecture
 
-![Technical Architecture](docs/architecture.png)
+![Technical Architecture](docs/architecture.jpg)
 
 
 Our technical architecture is a set of interconnected components, each playing a crucial role in creating the chat application:
 
 - **Client**: The frontend application is accessible in the user's browser.
+- **Federated GraphQL Gateway**: This will serve as the entrypoint to the different microservices by creating one unified API (WIP). 
 - **Chat Server (WS)**: This service establishes a bidirectional channel for communication between users, enabling real-time chats.
 - **Service Discovery**: A service responsible for routing users to available WebSocket servers, ensuring load balancing.
 - **Service Discovery DB**: This database maintains the status of different WebSocket servers, indicating whether they are online, offline, or deleted.

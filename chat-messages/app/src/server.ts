@@ -6,35 +6,45 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import http from 'http'
-import { startWorker } from './worker' // Import the startWorker function
+import { startWorker } from './worker'
+import { ApolloServer } from 'apollo-server-express'
+import schema from "./graphql/schema"
 
 const app = express()
 const port = process.env.PORT || 5678
 dotenv.config()
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cookieParser())
-app.use(
-    cors({
-        origin: process.env.FRONTEND_URL,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-    })
-)
-console.log(`The environment is: ${process.env.NODE_ENV}`)
+async function startServer() {
+    const apollo = new ApolloServer({ schema })
+    await apollo.start()
+    apollo.applyMiddleware({ app, path: '/graphql' })
 
-// Connect to API
-app.use('/api', api)
-app.get('/health-check', (req, res, next) =>
-    res.status(200).send('The server is up and running :)')
-)
-app.get('*', (req, res) =>
-    res.status(404).send('404. This endpoint does not exist:')
-)
+    app.use(bodyParser.json())
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use(cookieParser())
+    app.use(
+        cors({
+            origin: process.env.FRONTEND_URL,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        })
+    )
+    console.log(`The environment is: ${process.env.NODE_ENV}`)
 
-// Start the worker before creating the HTTP server
-startWorker()
+    // Connect to API
+    app.use('/api', api)
+    app.get('/health-check', (req, res, next) =>
+        res.status(200).send('The server is up and running :)')
+    )
+    app.get('*', (req, res) =>
+        res.status(404).send('404. This endpoint does not exist:')
+    )
 
-// Create an HTTP server
-const server = http.createServer(app)
-server.listen(port, () => console.log(`Running on port ${port}`))
+    // Start the worker before creating the HTTP server
+    startWorker()
+
+    // Create an HTTP server
+    const server = http.createServer(app)
+    server.listen(port, () => console.log(`Running on port ${port}`))
+}
+
+startServer()

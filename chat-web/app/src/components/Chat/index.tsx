@@ -247,7 +247,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
 
     // In case an user is not connected to a WebSocket and still tries to send messages,
     // those messages will be marked as QUEUED (shown with a clock icon in the message status).
-    // As soon as we reconect to a WebSocket, we will try to send the new messages to the
+    // As soon as we reconnect to a WebSocket, we will try to send the new messages to the
     // recipients. One catch is that we do not want (currently) to send all the messages at once
     // as this causes some rendering issues.
     // There are several solutions, like Batch Sending, but for now we work with Timeouts.
