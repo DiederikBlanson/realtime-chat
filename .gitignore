@@ -7,3 +7,6 @@
 dump.rdb
 
 .idea
+
+/grafana
+/prometheus/build

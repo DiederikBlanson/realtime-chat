@@ -10,21 +10,40 @@ import http from 'http'
 import WebSocket from 'ws'
 import { handleWebSocketConnection } from './ws-connection'
 import { CustomWebSocket } from './types'
+import { getSummary, getContentType, createMiddleware } from '@promster/express'
 
 const app = express()
 const port = process.env.PORT || 1234
 dotenv.config()
-console.log(`The environment is: ${process.env.NODE_ENV}`)
+
+const middleware = createMiddleware({
+    app,
+    options: {
+        metricBuckets: {
+            httpRequestContentLengthInBytes: [100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000,],
+            httpRequestDurationInSeconds: [0.05, 0.1, 0.3, 0.5, 0.8, 1, 1.5, 2, 3, 10],
+        },
+        metricPercentiles: {
+            httpRequestDurationPerPercentileInSeconds: [0.5, 0.9, 0.95, 0.98, 0.99],
+            httpResponseContentLengthInBytes: [100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000],
+        }
+    }
+})
+app.use(middleware)
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(
-    cors(/*{
-    origin: "http://localhost:3000",
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-}*/)
+    cors()
 )
+console.log(`The environment is: ${process.env.NODE_ENV}`)
+
+app.get('/metrics', async (req, res) => {
+    req.statusCode = 200
+    res.setHeader('Content-Type', getContentType())
+    res.end(await getSummary())
+})
 
 // Connect to API
 app.use('/api', api)

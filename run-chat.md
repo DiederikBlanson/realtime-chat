@@ -169,4 +169,50 @@ docker run \
 ```
 
 ---
-Now, your application is up and running, and you can access the client app in your web browser at http://localhost:3000!
+Congratz! Your application is up and running, and you can access the client app in your web browser at http://localhost:3000!
+
+
+## Optional: Monitoring
+To enable Prometheus and Grafana, perform the following steps.
+
+---
+**Step 12:** Run Prometheus with the following command (first one for a local installation in the folder `prometheus/build`):
+
+```bash
+cd prometheus/build
+./prometheus --config.file=prometheus.yml
+```
+
+or 
+
+```bash
+docker run \
+    --name prometheus \
+    -p 9090:9090 \
+    -v $(pwd)/prometheus/config.yml:/etc/prometheus/prometheus.yml:ro \
+    --network chat_network \
+    prom/prometheus:latest
+```
+
+---
+**Step 13:** Run Grafana with the following command (first one for a local installation in the folder `grafana`):
+
+```bash
+cd grafana
+GF_SERVER_HTTP_PORT=6767 ./bin/grafana server
+```
+
+or
+
+```bash
+docker run \
+    --name=grafana \
+    -p 6767:3000 \
+    --network chat_network \
+    grafana/grafana-oss:latest
+```
+
+---
+Now, you can access some additional monitoring tools:
+- Prometheus on http://localhost:9090
+- Grafana on http://localhost:6767
