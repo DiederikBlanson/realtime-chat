@@ -162,9 +162,10 @@ or
 
 ```bash
 docker run \
--p 4000:4000 \
---network chat_network \
-mesh
+    -p 4000:4000 \
+    -e MESSAGING_SERVICE_URL=http://localhost:5678 \
+    --network chat_network \
+    mesh
 ```
 
 ---

@@ -10,20 +10,26 @@ import { MessagesDocument } from '../graphql/generated/graphql'
 const useGraph = import.meta.env.VITE_APP_ENABLE_GRAPH == "true"
 
 const getMessages = async (name: string) => {
-    if (useGraph) {
-        const q = await client.query({
-            query: MessagesDocument,
-            variables: {
-                name: name,
-            }
-        })
-        return q.data.messages
+    const q = await client.query({
+        query: MessagesDocument,
+        variables: {
+            name: name,
+        }
+    })
+
+    const f = await axios.post(
+        `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`, {
+            name
+        }
+    )
+
+    console.log("Graph response: ", q.data.messages)
+    console.log("Rest response: ", f.data.messages)
+
+    if (useGraph){
+        // Read-only so copy the response. Source: https://github.com/apollographql/apollo-client/issues/3255
+        return JSON.parse(JSON.stringify(q.data.messages))
     } else {
-        const f = await axios.post(
-            `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`, {
-                name
-            }
-        )
         return f.data.messages
     }
 }

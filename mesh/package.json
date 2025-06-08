@@ -10,6 +10,7 @@
   "description": "",
   "dependencies": {
     "@graphql-hive/gateway": "^1.15.0",
-    "@graphql-mesh/compose-cli": "^1.4.9"
+    "@graphql-mesh/compose-cli": "^1.4.9",
+    "dotenv": "^16.5.0"
   }
 }
