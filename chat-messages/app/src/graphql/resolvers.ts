@@ -1,6 +1,11 @@
+import DataModel from '../model/dataModel'
+
+const dataModel = new DataModel()
+
 const resolvers = {
     Query: {
-        hello: () => 'Hello world!',
+        messages: async (_: any, args: any) =>
+            await dataModel.getInitialMessages(args.name)
     }
 }
 

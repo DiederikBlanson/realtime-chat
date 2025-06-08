@@ -88,8 +88,27 @@ enum join__Graph {
   CHAT_MESSAGES @join__graph(name: "Chat-Messages", url: "http://localhost:5678/graphql") 
 }
 
+scalar Date @join__type(graph: CHAT_MESSAGES) 
+
 scalar TransportOptions @join__type(graph: CHAT_MESSAGES) 
 
 type Query @join__type(graph: CHAT_MESSAGES)  {
-  hello: String!
+  messages(name: String!) : [Message!]!
+}
+
+type Message @join__type(graph: CHAT_MESSAGES)  {
+  id: ID!
+  text: String!
+  from: String!
+  to: String!
+  status: MessageStatus!
+  timestamp: Date!
+}
+
+enum MessageStatus @join__type(graph: CHAT_MESSAGES)  {
+  QUEUE @join__enumValue(graph: CHAT_MESSAGES) 
+  AWAITING @join__enumValue(graph: CHAT_MESSAGES) 
+  SEND @join__enumValue(graph: CHAT_MESSAGES) 
+  RECEIVED @join__enumValue(graph: CHAT_MESSAGES) 
+  READ @join__enumValue(graph: CHAT_MESSAGES) 
 }

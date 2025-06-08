@@ -1,5 +1,5 @@
 # Step 1: Use an official Node.js image as the base
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json ./
@@ -10,6 +10,8 @@ RUN sed -i 's#"@shared/\*": \["\.\./\.\./\.\./\.\./shared/\*"\]#"@shared/\*": \[
 
 RUN yarn run build
 ENV NODE_PATH=./build/api
+
+COPY src/graphql/schema.graphql build/graphql/schema.graphql
 
 EXPOSE 5678
 

@@ -24,3 +24,5 @@ spec:
               value: "http://localhost:5678"
             - name: VITE_APP_PRESENCE_URL
               value: "http://localhost:7777"
+            - name: VITE_APP_FEDERATED_GRAPH
+              value: "http://localhost:4000"

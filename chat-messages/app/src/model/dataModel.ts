@@ -59,7 +59,6 @@ export default class Model {
                 [name]
             )
         ).rows
-
         const result: Message[] = [...send_messages, ...received_messages]
             .map((s) => ({
                 id: parseFloat(s.id),
