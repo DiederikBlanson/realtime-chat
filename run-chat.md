@@ -124,6 +124,8 @@ docker run \
     -e VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678 \
     -e VITE_APP_PRESENCE_URL=http://localhost:7777 \
     -e VITE_APP_FEDERATED_GRAPH=http://localhost:4000 \
+    -e VITE_APP_DISABLE_CHAT_SD=true \
+    -e VITE_APP_WS_URL=localhost:4321 \
     --network chat_network \
     chat-web
 ```

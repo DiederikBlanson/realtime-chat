@@ -168,11 +168,23 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
     // from the Service Discovery, which maintains a list of valid WebSocket endpoints.
     // As such, we can connect to the websocket. When the connection is interrupted, we
     // try retrieving a new WebSocket server in intervals of 1000ms.
-    const connectWebSocket = async () => {
+    // For testing purposes, a feature flag is created to disable the call to the
+    // Service Discovery, and instead obtain the Websocket from an environment variable.
+
+    const getSocket = async () => {
+        if (import.meta.env.VITE_APP_DISABLE_CHAT_SD == "true"){
+            return import.meta.env.VITE_APP_WS_URL
+        }
+
         const sd = await fetch(
             `${import.meta.env.VITE_APP_SERVICE_DISCOVERY_URL}/api/ws-server`
         )
         const { ws: wsServer } = await sd.json()
+        return wsServer
+    }
+
+    const connectWebSocket = async () => {
+        const wsServer = await getSocket()
         const newWs = new WebSocket(
             `ws://${wsServer}?name=${name}&initialConnect=${initialConnectRef.current}&uuid=${uuid}`
         )
