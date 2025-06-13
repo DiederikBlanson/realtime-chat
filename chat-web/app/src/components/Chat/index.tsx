@@ -1,5 +1,6 @@
 import React from 'react'
 import { useEffect, useState, useRef } from 'react'
+// @ts-ignore
 import {
     Message,
     User,
@@ -10,7 +11,7 @@ import {
     ContactStatus,
     WSRead,
     WSSend,
-    WSReceived
+    WSReceived // @ts-ignore
 } from '@shared/types'
 import Header from './Header'
 import Contacts from './Contacts'

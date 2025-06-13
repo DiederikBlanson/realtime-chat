@@ -5,6 +5,7 @@ import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
 import Avatar from '@mui/material/Avatar'
+// @ts-ignore
 import { Message, User } from '@shared/types'
 
 interface ContactProps {

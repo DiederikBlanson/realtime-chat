@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ContactStatus } from '@shared/types'
 
 export default function formatLastSeen(contactStatus: ContactStatus) {

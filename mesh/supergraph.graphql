@@ -85,7 +85,7 @@ schema
   
   
 enum join__Graph {
-  CHAT_MESSAGES @join__graph(name: "Chat-Messages", url: "http://localhost:5678/graphql") 
+  CHAT_MESSAGES @join__graph(name: "Chat-Messages", url: "http://localhost:5678/graphql")
 }
 
 scalar Date @join__type(graph: CHAT_MESSAGES) 

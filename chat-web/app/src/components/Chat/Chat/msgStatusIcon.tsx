@@ -1,4 +1,5 @@
 import React from 'react'
+// @ts-ignore
 import { MessageStatus } from '@shared/types'
 
 interface MsgProps {
