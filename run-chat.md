@@ -48,18 +48,6 @@ npm install
 npm run dev
 ```
 
-or
-
-```bash
-docker run \
-    -p 8888:8888 \
-    -e FRONTEND_URL=http://localhost:3000 \
-    -e REDIS_HOST=redis-container \
-    -e REDIS_PORT=6379 \
-    --network chat_network \
-    chat-sd
-```
-
 ---
 **Step 7:**  Open Terminal 5 and run the following commands to start the messages service:
 
@@ -69,18 +57,6 @@ npm install
 npm run dev
 ```
 
-or
-
-```bash
-docker run \
-    -p 5678:5678 \
-    -e FRONTEND_URL=http://localhost:3000 \
-    -e RABBITMQ_URL=amqp://rabbitmq \
-    -e CASSANDRA_POINT=cassandra \
-    --network chat_network \
-    chat-messages
-```
-
 ---
 **Step 8:**  Open Terminal 6 and run the following commands to start the WebSocket server. You can specify a custom port (e.g., PORT=4321) for the WebSocket server:
 
@@ -88,20 +64,6 @@ docker run \
 cd chat-ws/app
 npm install
 PORT=4321 npm run dev
-```
-
-or
-
-```bash
-docker run \
-    -p 4321:4321 \
-    -e SERVER_HOST=http://localhost:7777 \
-    -e REDIS_HOST=redis-container \
-    -e REDIS_PORT=6379 \
-    -e PORT=4321 \
-    -e RABBITMQ_URL=amqp://rabbitmq \
-    --network chat_network \
-    chat-ws
 ```
 
 You can add more WebSocket servers by running PORT={other_port} npm run dev in additional terminals.
@@ -115,21 +77,6 @@ npm install
 npm start
 ```
 
-or 
-
-```bash
-docker run \
-    -p 3000:80 \
-    -e VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888 \
-    -e VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678 \
-    -e VITE_APP_PRESENCE_URL=http://localhost:7777 \
-    -e VITE_APP_FEDERATED_GRAPH=http://localhost:4000 \
-    -e VITE_APP_DISABLE_CHAT_SD=true \
-    -e VITE_APP_WS_URL=localhost:4321 \
-    --network chat_network \
-    chat-web
-```
-
 ---
 **Step 10:** Open Terminal 8 and run the following commands to start the presence server.
 
@@ -139,18 +86,6 @@ npm install
 npm run dev
 ```
 
-or
-
-```bash
-docker run \
-    -p 7777:7777 \
-    -e FRONTEND_URL=http://localhost:3000 \
-    -e RABBITMQ_URL=amqp://rabbitmq \
-    -e CASSANDRA_POINT=cassandra \
-    --network chat_network \
-    chat-presence
-```
-
 ---
 **Step 11:** Finally, run the Federated Graph with the following commands:
 
@@ -158,16 +93,6 @@ docker run \
 cd mesh
 npx mesh-compose -o supergraph.graphql
 npx hive-gateway supergraph
-```
-
-or
-
-```bash
-docker run \
-    -p 4000:4000 \
-    -e MESSAGING_SERVICE_URL=http://localhost:5678 \
-    --network chat_network \
-    mesh
 ```
 
 ---

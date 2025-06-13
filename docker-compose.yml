@@ -149,6 +149,25 @@ services:
       - chat-messages
     restart: always
 
+  prometheus:
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - chat_network
+    restart: always
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "6767:3000"
+    networks:
+      - chat_network
+
 networks:
   chat_network:
     driver: bridge
