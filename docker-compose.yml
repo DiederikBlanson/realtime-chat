@@ -37,6 +37,9 @@ services:
   chat-sd:
     image: chat-sd
     container_name: chat-sd
+    build:
+      context: ./chat-sd/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -53,6 +56,9 @@ services:
   chat-messages:
     image: chat-messages
     container_name: chat-messages
+    build:
+      context: ./chat-messages/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -69,6 +75,9 @@ services:
   chat-ws:
     image: chat-ws
     container_name: chat-ws
+    build:
+      context: ./chat-ws/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -87,6 +96,9 @@ services:
   chat-web:
     image: chat-web
     container_name: chat-web
+    build:
+      context: ./chat-web/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -95,7 +107,7 @@ services:
       - VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
       - VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
       - VITE_APP_PRESENCE_URL=http://localhost:7777
-      - VITE_APP_FEDERATED_GRAPH=http://localhost:4000
+      - VITE_APP_FEDERATED_GRAPH=http://localhost:4000 # TODO: add VITE_APP_ENABLE_GRAPH=true
       - VITE_APP_DISABLE_CHAT_SD=true
       - VITE_APP_WS_URL=localhost:4321
     depends_on:
@@ -108,6 +120,9 @@ services:
   chat-presence:
     image: chat-presence
     container_name: chat-presence
+    build:
+      context: ./chat-presence/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -119,6 +134,22 @@ services:
     depends_on:
       - redis-container
       - cassandra
+    restart: always
+
+  mesh:
+    image: mesh
+    container_name: mesh
+    build:
+      context: ./mesh
+      dockerfile: Dockerfile
+    networks:
+      - chat_network
+    ports:
+      - "4000:4000"
+    environment:
+      - MESSAGING_SERVICE_URL=http://localhost:5678
+    depends_on:
+      - chat-messages
     restart: always
 
 networks:
