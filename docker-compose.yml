@@ -42,11 +42,12 @@ services:
     restart: "no"
 
   chat-sd:
-    image: chat-sd
+    image: dedder98/chat-sd:latest
+    platform: linux/amd64
     container_name: chat-sd
-    build:
-      context: ./chat-sd/app
-      dockerfile: Dockerfile
+#    build:
+#      context: ./chat-sd/app
+#      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -61,11 +62,12 @@ services:
     restart: always
 
   chat-messages:
-    image: chat-messages
+    image: dedder98/chat-messages:latest
+    platform: linux/amd64
     container_name: chat-messages
-    build:
-      context: ./chat-messages/app
-      dockerfile: Dockerfile
+#    build:
+#      context: ./chat-messages/app
+#      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -80,11 +82,12 @@ services:
     restart: always
 
   chat-ws:
-    image: chat-ws
+    image: dedder98/chat-ws:latest
+    platform: linux/amd64
     container_name: chat-ws
-    build:
-      context: ./chat-ws/app
-      dockerfile: Dockerfile
+#    build:
+#      context: ./chat-ws/app
+#      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -101,11 +104,11 @@ services:
     restart: always
 
   chat-web:
-    image: chat-web
+    image: dedder98/chat-web:latest
     container_name: chat-web
-    build:
-      context: ./chat-web/app
-      dockerfile: Dockerfile
+#    build:
+#      context: ./chat-web/app
+#      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
