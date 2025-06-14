@@ -40,6 +40,14 @@ jobs:
           file: ./chat-web/app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/chat-web:latest
+          build-args: |
+            VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
+            VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
+            VITE_APP_PRESENCE_URL=http://localhost:7777
+            VITE_APP_FEDERATED_GRAPH=http://localhost:4000
+            VITE_APP_ENABLE_GRAPH=true
+            VITE_APP_DISABLE_CHAT_SD=true
+            VITE_APP_WS_URL=localhost:4321
         env:
           VITE_APP_SERVICE_DISCOVERY_URL: http://localhost:8888
           VITE_APP_MESSAGING_SERVICE_URL: http://localhost:5678
