@@ -1,16 +1,104 @@
-name: Docker Image CI
+name: Publish Docker Images
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-
-  build:
-
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # chat-sd
+      - name: Build & Push chat-sd
+        uses: docker/build-push-action@v5
+        with:
+          context: ./chat-sd/app
+          file: ./chat-sd/app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/chat-sd:latest
+
+      # chat-web
+      - name: Build & Push chat-web
+        uses: docker/build-push-action@v5
+        with:
+          context: ./chat-web/app
+          file: ./chat-web/app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/chat-web:latest
+          build-args: |
+            VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
+            VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
+            VITE_APP_PRESENCE_URL=http://localhost:7777
+            VITE_APP_FEDERATED_GRAPH=http://localhost:4000
+            VITE_APP_ENABLE_GRAPH=true
+            VITE_APP_DISABLE_CHAT_SD=true
+            VITE_APP_WS_URL=localhost:4321
+
+      # chat-messages
+      - name: Build & Push chat-messages
+        uses: docker/build-push-action@v5
+        with:
+          context: ./chat-messages/app
+          file: ./chat-messages/app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/chat-messages:latest
+
+      # chat-ws
+      - name: Build & Push chat-ws
+        uses: docker/build-push-action@v5
+        with:
+          context: ./chat-ws/app
+          file: ./chat-ws/app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/chat-ws:latest
+
+      # chat-presence
+      - name: Build & Push chat-presence
+        uses: docker/build-push-action@v5
+        with:
+          context: ./chat-presence/app
+          file: ./chat-presence/app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/chat-presence:latest
+
+      # mesh-compose
+      - name: Build & Push mesh-compose
+        uses: docker/build-push-action@v5
+        with:
+          context: ./mesh
+          file: ./mesh/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/mesh-compose:latest
+
+      # init-cassandra
+      - name: Build & Push init-cassandra
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cassandra
+          file: ./cassandra/init.Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
+
+      # prometheus
+      - name: Build & Push prometheus
+        uses: docker/build-push-action@v5
+        with:
+          context: ./prometheus
+          file: ./prometheus/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/prometheus:latest
