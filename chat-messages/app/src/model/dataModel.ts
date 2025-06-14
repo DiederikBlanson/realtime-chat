@@ -59,16 +59,17 @@ export default class Model {
                 [name]
             )
         ).rows
+
         const result: Message[] = [...send_messages, ...received_messages]
             .map((s) => ({
-                id: parseFloat(s.id),
+                id: s.id,
                 from: s.from_user,
                 to: s.to_user,
                 text: s.message,
                 status: s.status,
                 timestamp: s.created_at
             }))
-            .sort((a, b) => a.id - b.id)
+            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
         return result
     }

@@ -405,7 +405,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
         if (message === '') return
 
         const msgObject: Message = {
-            id: new Date().getTime(),
+            id: (new Date().getTime()).toString(),
             from: uid,
             text: message,
             status:
