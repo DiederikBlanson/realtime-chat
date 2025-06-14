@@ -28,15 +28,25 @@ services:
     ports:
       - "9042:9042"
       - "9160:9160"
-    environment:
-      - CASSANDRA_USER=admin
-      - CASSANDRA_PASSWORD=admin
     volumes:
       - cassandra-data:/var/lib/cassandra
+
+  init-cassandra:
+    build:
+      context: ./cassandra
+      dockerfile: cassandra/init.Dockerfile
+    networks:
+      - chat_network
+    depends_on:
+      - cassandra
+    restart: "no"
 
   chat-sd:
     image: chat-sd
     container_name: chat-sd
+    build:
+      context: ./chat-sd/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -47,12 +57,15 @@ services:
       - REDIS_PORT=6379
     depends_on:
       - redis-container
-      - cassandra
+      - init-cassandra
     restart: always
 
   chat-messages:
     image: chat-messages
     container_name: chat-messages
+    build:
+      context: ./chat-messages/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -63,12 +76,15 @@ services:
       - CASSANDRA_POINT=cassandra
     depends_on:
       - redis-container
-      - cassandra
+      - init-cassandra
     restart: always
 
   chat-ws:
     image: chat-ws
     container_name: chat-ws
+    build:
+      context: ./chat-ws/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -81,12 +97,15 @@ services:
       - RABBITMQ_URL=amqp://rabbitmq
     depends_on:
       - redis-container
-      - cassandra
+      - init-cassandra
     restart: always
 
   chat-web:
     image: chat-web
     container_name: chat-web
+    build:
+      context: ./chat-web/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -96,6 +115,7 @@ services:
       - VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
       - VITE_APP_PRESENCE_URL=http://localhost:7777
       - VITE_APP_FEDERATED_GRAPH=http://localhost:4000
+      - VITE_APP_ENABLE_GRAPH=true
       - VITE_APP_DISABLE_CHAT_SD=true
       - VITE_APP_WS_URL=localhost:4321
     depends_on:
@@ -108,6 +128,9 @@ services:
   chat-presence:
     image: chat-presence
     container_name: chat-presence
+    build:
+      context: ./chat-presence/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -118,8 +141,42 @@ services:
       - CASSANDRA_POINT=cassandra
     depends_on:
       - redis-container
-      - cassandra
+      - init-cassandra
     restart: always
+
+  mesh:
+    # The url's in the supergraph.graphql are not localhost but the name of the services.
+    # Create a mesh-compose container and replace the url's in the schema.
+    image: mesh-compose
+    container_name: mesh
+    networks:
+      - chat_network
+    ports:
+      - "4000:4000"
+    environment:
+      - MESSAGING_SERVICE_URL=http://chat-messages:5678
+    depends_on:
+      - chat-messages
+    restart: always
+
+  prometheus:
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - chat_network
+    restart: always
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "6767:3000"
+    networks:
+      - chat_network
 
 networks:
   chat_network:

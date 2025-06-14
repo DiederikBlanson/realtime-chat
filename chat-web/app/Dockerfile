@@ -3,12 +3,12 @@ FROM node:20-alpine as builder
 WORKDIR /app
 
 COPY package.json .
-RUN yarn install
+RUN npm install
 
 COPY . .
 RUN sed -i 's#"@shared/\*": \["\.\./\.\./shared/\*"\]#"@shared/\*": \["shared/\*"\]#' tsconfig.json
 
-RUN yarn build
+RUN npm run build
 
 # Stage 2: NGINX Server
 FROM nginx:1.19.0

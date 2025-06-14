@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Login from './Login'
+// @ts-ignore
 import { Message } from '@shared/types'
 import Chat from './Chat'
 import axios from 'axios'

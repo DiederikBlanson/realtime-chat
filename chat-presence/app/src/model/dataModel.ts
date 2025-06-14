@@ -1,9 +1,12 @@
 import cassandra from 'cassandra-driver'
 import { UserStatus } from '@shared/types'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const client = new cassandra.Client({
     // @ts-ignore
-    contactPoints: [process.env.CASSANDRA_POINT || '127.0.0.1'],
+    contactPoints: [process.env.CASSANDRA_POINT as string || '127.0.0.1'],
     localDataCenter: 'datacenter1',
     keyspace: 'presence'
 })

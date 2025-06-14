@@ -59,7 +59,7 @@ INSERT INTO chat.messages (from_user, to_user, message, id, status, created_at) 
 INSERT INTO chat.messages (from_user, to_user, message, id, status, created_at) VALUES ('roger', 'carlos', 'A "net-ritious" idea, Carlos! Lets open a restaurant - "The Tennis Spoon."', '69', 'READ', '2023-01-20 18:00:00');
 INSERT INTO chat.messages (from_user, to_user, message, id, status, created_at) VALUES ('carlos', 'roger', 'Sounds like a smashing hit! But first, lets finish our match and then feast!', '70', 'READ', '2023-01-20 19:30:00');
 
-INSERT INTO presence.status (user, status, last_active_at) VALUES ('roger', 'OFFLINE', '2023-10-18 16:30:00');
+INSERT INTO presence.status (user, status, last_active_at) VALUES ('roger', 'OFFLINE', '2025-06-14 9:30:00');
 INSERT INTO presence.status (user, status, last_active_at) VALUES ('novak', 'OFFLINE', '2023-10-17 19:30:00');
 INSERT INTO presence.status (user, status, last_active_at) VALUES ('carlos', 'OFFLINE', '2023-10-14 05:30:00');
 INSERT INTO presence.status (user, status, last_active_at) VALUES ('andy', 'OFFLINE', '2023-09-12 16:30:00');
