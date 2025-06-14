@@ -32,9 +32,8 @@ services:
       - cassandra-data:/var/lib/cassandra
 
   init-cassandra:
-    build:
-      context: ./cassandra
-      dockerfile: init.Dockerfile
+    image: dedder98/init-cassandra:latest
+    platform: linux/amd64
     networks:
       - chat_network
     depends_on:
@@ -42,11 +41,9 @@ services:
     restart: "no"
 
   chat-sd:
-    image: chat-sd
+    image: dedder98/chat-sd:latest
+    platform: linux/amd64
     container_name: chat-sd
-    build:
-      context: ./chat-sd/app
-      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -61,11 +58,9 @@ services:
     restart: always
 
   chat-messages:
-    image: chat-messages
+    image: dedder98/chat-messages:latest
+    platform: linux/amd64
     container_name: chat-messages
-    build:
-      context: ./chat-messages/app
-      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -80,11 +75,9 @@ services:
     restart: always
 
   chat-ws:
-    image: chat-ws
+    image: dedder98/chat-ws:latest
+    platform: linux/amd64
     container_name: chat-ws
-    build:
-      context: ./chat-ws/app
-      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -101,23 +94,13 @@ services:
     restart: always
 
   chat-web:
-    image: chat-web
+    image: dedder98/chat-web:latest
     container_name: chat-web
-    build:
-      context: ./chat-web/app
-      dockerfile: Dockerfile
+    pull_policy: always
     networks:
       - chat_network
     ports:
       - "3000:80"
-    environment:
-      - VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
-      - VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
-      - VITE_APP_PRESENCE_URL=http://localhost:7777
-      - VITE_APP_FEDERATED_GRAPH=http://localhost:4000
-      - VITE_APP_ENABLE_GRAPH=true
-      - VITE_APP_DISABLE_CHAT_SD=true
-      - VITE_APP_WS_URL=localhost:4321
     depends_on:
       - chat-sd
       - chat-messages
@@ -126,11 +109,9 @@ services:
     restart: always
 
   chat-presence:
-    image: chat-presence
+    image: dedder98/chat-presence:latest
+    platform: linux/amd64
     container_name: chat-presence
-    build:
-      context: ./chat-presence/app
-      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -160,9 +141,8 @@ services:
     restart: always
 
   prometheus:
-    build:
-      context: ./prometheus
-      dockerfile: Dockerfile
+    image: dedder98/prometheus:latest
+    platform: linux/amd64
     container_name: prometheus
     ports:
       - "9090:9090"
