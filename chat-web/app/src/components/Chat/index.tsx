@@ -17,6 +17,7 @@ import Header from './Header'
 import Contacts from './Contacts'
 import Chat from './Chat'
 import axios from 'axios'
+import getConfig from '../../utils/js/getConfig'
 
 const fetchedUsers = [
     {
@@ -173,12 +174,12 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
     // Service Discovery, and instead obtain the Websocket from an environment variable.
 
     const getSocket = async () => {
-        if (import.meta.env.VITE_APP_DISABLE_CHAT_SD == "true"){
-            return import.meta.env.VITE_APP_WS_URL
+        if (getConfig("VITE_APP_DISABLE_CHAT_SD") == "true"){
+            return getConfig("VITE_APP_WS_URL")
         }
 
         const sd = await fetch(
-            `${import.meta.env.VITE_APP_SERVICE_DISCOVERY_URL}/api/ws-server`
+            `${getConfig("VITE_APP_SERVICE_DISCOVERY_URL")}/api/ws-server`
         )
         const { ws: wsServer } = await sd.json()
         return wsServer
@@ -215,7 +216,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
         const update = async () => {
             const d = await axios.post(
                 `${
-                    import.meta.env.VITE_APP_PRESENCE_URL
+                    getConfig("VITE_APP_PRESENCE_URL")
                 }/api/subscribe-to-other`,
                 {
                     uid,
@@ -248,7 +249,7 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
                 return
 
             await axios.post(
-                `${import.meta.env.VITE_APP_PRESENCE_URL}/api/heartbeat`,
+                `${getConfig("VITE_APP_PRESENCE_URL")}/api/heartbeat`,
                 {
                     uid
                 }

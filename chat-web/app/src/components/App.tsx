@@ -7,11 +7,9 @@ import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import {client} from "../graphql/connect"
 import { MessagesDocument } from '../graphql/generated/graphql'
+import getConfig from '../utils/js/getConfig'
 
-const useGraph = import.meta.env.VITE_APP_ENABLE_GRAPH == "true"
-
-console.log("Environment variables: ", import.meta.env)
-console.log("Window variables: ", window)
+const useGraph = getConfig("VITE_APP_ENABLE_GRAPH") == "true"
 
 const getMessages = async (name: string) => {
     if (useGraph){
@@ -26,7 +24,7 @@ const getMessages = async (name: string) => {
         return JSON.parse(JSON.stringify(q.data.messages))
     } else {
         const f = await axios.post(
-            `${import.meta.env.VITE_APP_MESSAGING_SERVICE_URL}/api/messages`, {
+            `${getConfig("VITE_APP_MESSAGING_SERVICE_URL")}/api/messages`, {
                 name
             }
         )
