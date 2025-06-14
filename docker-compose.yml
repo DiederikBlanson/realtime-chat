@@ -32,16 +32,14 @@ services:
       - cassandra-data:/var/lib/cassandra
 
   init-cassandra:
-    image: cassandra:latest
+    build:
+      context: ./cassandra
+      dockerfile: cassandra/init.Dockerfile
     networks:
       - chat_network
     depends_on:
       - cassandra
     restart: "no"
-    entrypoint: [ "/compose-init.sh" ]
-    volumes:
-      - ./cassandra/compose-init.sh:/compose-init.sh
-      - ./cassandra/data.cql:/data.cql
 
   chat-sd:
     image: chat-sd
