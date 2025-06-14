@@ -1,7 +1,7 @@
 export type MessageStatus = 'QUEUE' | 'AWAITING' | 'SEND' | 'RECEIVED' | 'READ'
 
 export type Message = {
-    id: number
+    id: string
     text: string
     from: string
     to: string

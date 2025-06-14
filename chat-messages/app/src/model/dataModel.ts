@@ -61,7 +61,7 @@ export default class Model {
         ).rows
         const result: Message[] = [...send_messages, ...received_messages]
             .map((s) => ({
-                id: parseFloat(s.id),
+                id: s.id,
                 from: s.from_user,
                 to: s.to_user,
                 text: s.message,
