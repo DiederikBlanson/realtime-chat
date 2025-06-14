@@ -34,7 +34,7 @@ services:
   init-cassandra:
     build:
       context: ./cassandra
-      dockerfile: cassandra/init.Dockerfile
+      dockerfile: init.Dockerfile
     networks:
       - chat_network
     depends_on:
