@@ -11,6 +11,7 @@ import { MessagesDocument } from '../graphql/generated/graphql'
 const useGraph = import.meta.env.VITE_APP_ENABLE_GRAPH == "true"
 
 console.log("Environment variables: ", import.meta.env)
+console.log("Window variables: ", window)
 
 const getMessages = async (name: string) => {
     if (useGraph){

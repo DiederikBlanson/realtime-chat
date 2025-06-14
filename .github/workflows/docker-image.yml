@@ -33,6 +33,18 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USER }}/chat-sd:latest
 
       # chat-web
+      - name: Inject runtime config.js
+        run: |
+          mkdir -p ./chat-web/app/public
+          cat <<EOF > ./chat-web/app/public/config.js
+          window.VITE_APP_SERVICE_DISCOVERY_URL = "http://localhost:8888";
+          window.VITE_APP_MESSAGING_SERVICE_URL = "http://localhost:5678";
+          window.VITE_APP_PRESENCE_URL = "http://localhost:7777";
+          window.VITE_APP_FEDERATED_GRAPH = "http://localhost:4000";
+          window.VITE_APP_ENABLE_GRAPH = "true";
+          window.VITE_APP_DISABLE_CHAT_SD = "true";
+          window.VITE_APP_WS_URL = "localhost:4321";
+          EOF
       - name: Build & Push chat-web
         uses: docker/build-push-action@v5
         with:
@@ -40,22 +52,6 @@ jobs:
           file: ./chat-web/app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/chat-web:latest
-          build-args: |
-            VITE_APP_SERVICE_DISCOVERY_URL=http://localhost:8888
-            VITE_APP_MESSAGING_SERVICE_URL=http://localhost:5678
-            VITE_APP_PRESENCE_URL=http://localhost:7777
-            VITE_APP_FEDERATED_GRAPH=http://localhost:4000
-            VITE_APP_ENABLE_GRAPH=true
-            VITE_APP_DISABLE_CHAT_SD=true
-            VITE_APP_WS_URL=localhost:4321
-        env:
-          VITE_APP_SERVICE_DISCOVERY_URL: http://localhost:8888
-          VITE_APP_MESSAGING_SERVICE_URL: http://localhost:5678
-          VITE_APP_PRESENCE_URL: http://localhost:7777
-          VITE_APP_FEDERATED_GRAPH: http://localhost:4000
-          VITE_APP_ENABLE_GRAPH: true
-          VITE_APP_DISABLE_CHAT_SD: true
-          VITE_APP_WS_URL: localhost:4321
 
       # chat-messages
       - name: Build & Push chat-messages
