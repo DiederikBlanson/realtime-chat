@@ -104,11 +104,11 @@ services:
     restart: always
 
   chat-web:
-    image: dedder98/chat-web:latest
+    image: chat-web
     container_name: chat-web
-#    build:
-#      context: ./chat-web/app
-#      dockerfile: Dockerfile
+    build:
+      context: ./chat-web/app
+      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
@@ -129,11 +129,11 @@ services:
     restart: always
 
   chat-presence:
-    image: chat-presence
+    image: dedder98/chat-presence:latest
     container_name: chat-presence
-    build:
-      context: ./chat-presence/app
-      dockerfile: Dockerfile
+#    build:
+#      context: ./chat-presence/app
+#      dockerfile: Dockerfile
     networks:
       - chat_network
     ports:
