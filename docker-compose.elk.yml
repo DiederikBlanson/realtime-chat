@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: elasticsearch
+    environment:
+#      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
+      - KIBANA_USER=kibanadied3
+      - KIBANA_PASS=kibana123
+      - LOGSTASH_USER=logstash_internal2
+      - LOGSTASH_PASS=logstash123
+      - xpack.security.enabled=false
+      - transport.port=9300
+      - http.port=9200
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - ./elasticsearch/init.sh:/usr/local/bin/init-elasticsearch-users.sh
+    command: >
+      bash -c "/usr/share/elasticsearch/bin/elasticsearch & sleep 10 && /usr/local/bin/init-elasticsearch-users.sh && wait"
+    networks:
+      - chat_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+      - ELASTICSEARCH_USERNAME=kibanadied3
+      - ELASTICSEARCH_PASSWORD=kibana123
+    ports:
+      - 5601:5601
+    networks:
+      - chat_network
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.0
+    container_name: logstash
+    ports:
+      - 5044:5044
+      - 9600:9600
+    environment:
+      - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
+      - ELASTIC_HOST=http://elasticsearch:9200
+      - ELASTIC_USERNAME=logstash_internal2
+      - ELASTIC_PASSWORD=logstash123
+      - ELASTIC_INDEX=chatter
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - chat_network
+    depends_on:
+      - elasticsearch
+
+networks:
+  chat_network: {}
