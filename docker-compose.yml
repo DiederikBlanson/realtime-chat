@@ -39,7 +39,8 @@ services:
       - cassandra-data:/var/lib/cassandra
 
   init-cassandra:
-    image: init-cassandra
+    image: init-cassandra # dedder98/init-cassandra:latest
+    # platform: linux/amd64
     container_name: init-cassandra
     build:
       context: ./cassandra
@@ -51,7 +52,8 @@ services:
     restart: "no"
 
   chat-sd:
-    image: chat-sd
+    image: chat-sd # dedder98/chat-sd:latest
+    # platform: linux/amd64
     container_name: chat-sd
     build:
       context: ./chat-sd/app
@@ -70,7 +72,8 @@ services:
     restart: always
 
   chat-messages:
-    image: chat-messages
+    image: chat-messages # dedder98/chat-messages:latest
+    # platform: linux/amd64
     container_name: chat-messages
     build:
       context: ./chat-messages/app
@@ -90,7 +93,8 @@ services:
     restart: always
 
   chat-ws:
-    image: chat-ws
+    image: chat-ws # dedder98/chat-ws:latest
+    # platform: linux/amd64
     container_name: chat-ws
     build:
       context: ./chat-ws/app
@@ -111,7 +115,7 @@ services:
     restart: always
 
   chat-web:
-    image: chat-web
+    image: chat-web # dedder98/chat-web:latest
     container_name: chat-web
     build:
       context: ./chat-web/app
@@ -136,7 +140,8 @@ services:
     restart: always
 
   chat-presence:
-    image: chat-presence
+    image: chat-presence # dedder98/chat-presence:latest
+    # platform: linux/amd64
     container_name: chat-presence
     build:
       context: ./chat-presence/app
@@ -170,6 +175,8 @@ services:
     restart: always
 
   prometheus:
+#    image: dedder98/prometheus:latest
+#    platform: linux/amd64
     build:
       context: ./prometheus
       dockerfile: Dockerfile
@@ -202,8 +209,8 @@ services:
       - transport.port=9300
       - http.port=9200
     ports:
-      - 9200:9200
-      - 9300:9300
+      - "9200:9200"
+      - "9300:9300"
     volumes:
       - ./elasticsearch/init.sh:/usr/local/bin/init-elasticsearch-users.sh
     command: >
@@ -219,7 +226,7 @@ services:
       - ELASTICSEARCH_USERNAME=kibanadied3
       - ELASTICSEARCH_PASSWORD=kibana123
     ports:
-      - 5601:5601
+      - "5601:5601"
     networks:
       - chat_network
     depends_on:
@@ -229,8 +236,8 @@ services:
     image: docker.elastic.co/logstash/logstash:8.13.0
     container_name: logstash
     ports:
-      - 5044:5044
-      - 9600:9600
+      - "5044:5044"
+      - "9600:9600"
     environment:
       - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
       - ELASTIC_HOST=http://elasticsearch:9200
