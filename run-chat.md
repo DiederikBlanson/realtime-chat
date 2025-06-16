@@ -6,11 +6,10 @@ Before you start the application, ensure that you have the following modules ins
 - [Redis](https://redis.io/)
 - [Docker](https://www.docker.com/)
 
-
 Follow these steps to set up and run the application:
 
 ---
-**Step 1:** Create a the "chat-net" Docker network
+**Step 1:** Create the "chat-net" Docker network
 ```bash
 docker network create chat-net
 ```
@@ -28,14 +27,12 @@ sh rabbitmq/setup-rabbit.sh
 sh redis/setup-redis.sh
 ```
 
-
 **Step 4:**  Open Terminal 3 and execute the following command to start the Cassandra cluster:
 
 ```bash
 cd cassandra
 sh setup-cassandra.sh
 ```
-
 
 **Step 5:**  Open Terminal 4 and execute the following command to start the ELK stack:
 
@@ -45,7 +42,6 @@ docker-compose -f docker-compose.elk.yml up
 ```
 
 **Step 6:**  Wait until the RabbitMQ, Redis, Cassandra and ELK stack services have fully started. This may take a moment.
-
 
 **Step 7:**  Open Terminal 4 and run the following commands to start the chat application:
 
@@ -152,7 +148,7 @@ Now, you can access some additional monitoring tools:
 - Grafana on http://localhost:6767
 
 
-## Docker-compose
+## Docker-Compose
 
 An alternative (and easy) approach is to run everything with docker-compose. This will spin up all services described above.
 ```bash

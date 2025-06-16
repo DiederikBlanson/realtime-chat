@@ -9,7 +9,7 @@ const resolvers = {
             try {
                 return await dataModel.getInitialMessages(args.name)
             } catch (e){
-                logger.error(`Error when retrieving all messages: ${e}`, { service: 'chat-messages' }) // TODO: define chat-messages in logger.ts
+                logger.error(`Error when retrieving all messages: ${e}`, { service: 'chat-messages' })
             }
         }
     }
