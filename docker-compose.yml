@@ -175,8 +175,8 @@ services:
     restart: always
 
   prometheus:
-#    image: dedder98/prometheus:latest
-#    platform: linux/amd64
+    # image: dedder98/prometheus:latest
+    # platform: linux/amd64
     build:
       context: ./prometheus
       dockerfile: Dockerfile
@@ -239,6 +239,7 @@ services:
       - "5044:5044"
       - "9600:9600"
     environment:
+      - LOGSTASH_PORT=5044
       - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
       - ELASTIC_HOST=http://elasticsearch:9200
       - ELASTIC_USERNAME=logstash_internal2
@@ -250,7 +251,6 @@ services:
     depends_on:
       - elasticsearch
 
-# TODO: ELK stack must first be finished then do all other services
 networks:
   chat_network:
     driver: bridge
