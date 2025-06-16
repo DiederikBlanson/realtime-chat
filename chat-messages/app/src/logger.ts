@@ -2,11 +2,10 @@ import winston from 'winston'
 import net from 'net'
 import { Writable } from 'stream'
 
-const logstashHost = 'logstash' // TODO: change this to logstash or 0.0.0.0
-const logstashPort = 5044
+const logstashHost = process.env.LOGSTASH_HOST || "0.0.0.0"
+const logstashPort = Number(process.env.LOGSTASH_PORT) || 5044
 
 const socket = net.createConnection(logstashPort, logstashHost)
-
 const logstashStream = new Writable({
     write(chunk, encoding, callback) {
         socket.write(chunk.toString() + '\n')
