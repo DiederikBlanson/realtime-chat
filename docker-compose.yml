@@ -5,7 +5,8 @@ services:
     image: redis:latest
     container_name: redis-container
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "6379:6379"
     restart: always
@@ -14,7 +15,8 @@ services:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -24,14 +26,11 @@ services:
     image: cassandra:latest
     container_name: cassandra
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "9042:9042"
       - "9160:9160"
-    depends_on:
-      - elasticsearch
-      - kibana
-      - logstash
     environment:
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
@@ -46,7 +45,8 @@ services:
       context: ./cassandra
       dockerfile: init.Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     depends_on:
       - cassandra
     restart: "no"
@@ -59,7 +59,8 @@ services:
       context: ./chat-sd/app
       dockerfile: Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "8888:8888"
     environment:
@@ -79,17 +80,19 @@ services:
       context: ./chat-messages/app
       dockerfile: Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "5678:5678"
     environment:
       - FRONTEND_URL=http://localhost:3000
       - RABBITMQ_URL=amqp://rabbitmq
       - CASSANDRA_POINT=cassandra
+      - LOGSTASH_HOST=logstash
+      - LOGSTASH_PORT=5044
     depends_on:
       - redis-container
       - init-cassandra
-      - elasticsearch
     restart: always
 
   chat-ws:
@@ -100,7 +103,8 @@ services:
       context: ./chat-ws/app
       dockerfile: Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "4321:4321"
     environment:
@@ -121,7 +125,8 @@ services:
       context: ./chat-web/app
       dockerfile: Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "3000:80"
     environment:
@@ -147,7 +152,8 @@ services:
       context: ./chat-presence/app
       dockerfile: Dockerfile
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "7777:7777"
     environment:
@@ -165,7 +171,8 @@ services:
     image: mesh-compose
     container_name: mesh
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     ports:
       - "4000:4000"
     environment:
@@ -184,7 +191,8 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - chat_network
+      - chat-net
+      - elk-net
     restart: always
 
   grafana:
@@ -193,67 +201,14 @@ services:
     ports:
       - "6767:3000"
     networks:
-      - chat_network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
-      - KIBANA_USER=kibanadied3
-      - KIBANA_PASS=kibana123
-      - LOGSTASH_USER=logstash_internal2
-      - LOGSTASH_PASS=logstash123
-      - xpack.security.enabled=false
-      - transport.port=9300
-      - http.port=9200
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - ./elasticsearch/init.sh:/usr/local/bin/init-elasticsearch-users.sh
-    command: >
-      bash -c "/usr/share/elasticsearch/bin/elasticsearch & sleep 10 && /usr/local/bin/init-elasticsearch-users.sh && wait"
-    networks:
-      - chat_network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
-      - ELASTICSEARCH_USERNAME=kibanadied3
-      - ELASTICSEARCH_PASSWORD=kibana123
-    ports:
-      - "5601:5601"
-    networks:
-      - chat_network
-    depends_on:
-      - elasticsearch
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.13.0
-    container_name: logstash
-    ports:
-      - "5044:5044"
-      - "9600:9600"
-    environment:
-      - LOGSTASH_PORT=5044
-      - ELASTIC_PASSWORD=QwNnicjy21lVGL+Tp0jK
-      - ELASTIC_HOST=http://elasticsearch:9200
-      - ELASTIC_USERNAME=logstash_internal2
-      - ELASTIC_PASSWORD=logstash123
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    networks:
-      - chat_network
-    depends_on:
-      - elasticsearch
+      - chat-net
+      - elk-net
 
 networks:
-  chat_network:
+  chat-net:
     driver: bridge
+  elk-net:
+    external: true
 
 volumes:
   cassandra-data:

@@ -1,11 +1,19 @@
 docker pull cassandra
 
-# remove old 
+# Remove old container
 docker stop cassandra
 docker rm cassandra
 
-# create cassandra
-docker run --name cassandra -p 127.0.0.1:9042:9042 -p 127.0.0.1:9160:9160 --network chat_network -d cassandra
+# Create Cassandra container with environment variables
+docker run --name cassandra \
+  -p 127.0.0.1:9042:9042 \
+  -p 127.0.0.1:9160:9160 \
+  --network chat-net \
+  -e MAX_HEAP_SIZE=512M \
+  -e HEAP_NEWSIZE=100M \
+  -d cassandra
+
+# Copy the CQL script into the container
 docker cp data.cql cassandra:/data.cql
 
 # Loop to retry running the CQL script
