@@ -182,12 +182,12 @@ services:
     restart: always
 
   prometheus:
-    # image: dedder98/prometheus:latest
+    image: prometheus # image: dedder98/prometheus:latest
     # platform: linux/amd64
+    container_name: prometheus
     build:
       context: ./prometheus
       dockerfile: Dockerfile
-    container_name: prometheus
     ports:
       - "9090:9090"
     networks:
@@ -203,6 +203,13 @@ services:
     networks:
       - chat-net
       - elk-net
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: always
 
 networks:
   chat-net:
