@@ -7,8 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  docker-builds:
-    name: Docker Image Build
+  build-images:
     runs-on: ubuntu-latest
 
     permissions:
@@ -17,18 +16,37 @@ jobs:
       attestations: write
       id-token: write
 
+    strategy:
+      matrix:
+        service:
+          - name: chat-sd
+            context: ./chat-sd/app
+            dockerfile: ./chat-sd/app/Dockerfile
+          - name: chat-web
+            context: ./chat-web/app
+            dockerfile: ./chat-web/app/Dockerfile
+          - name: chat-messages
+            context: ./chat-messages/app
+            dockerfile: ./chat-messages/app/Dockerfile
+          - name: chat-ws
+            context: ./chat-ws/app
+            dockerfile: ./chat-ws/app/Dockerfile
+          - name: chat-presence
+            context: ./chat-presence/app
+            dockerfile: ./chat-presence/app/Dockerfile
+          - name: mesh-compose
+            context: ./mesh
+            dockerfile: ./mesh/Dockerfile
+          - name: init-cassandra
+            context: ./cassandra
+            dockerfile: ./cassandra/init.Dockerfile
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub (only on push)
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Inject config.js for chat-web
+      - name: Inject runtime config.js for chat-web
+        if: matrix.service.name == 'chat-web'
         run: |
           mkdir -p ./chat-web/app/public
           cat <<EOF > ./chat-web/app/public/config.js
@@ -41,46 +59,17 @@ jobs:
           window.VITE_APP_WS_URL = "localhost:4321";
           EOF
 
-      - name: Build all Docker images
-        run: |
-          set -e
-
-          echo "▶ Building chat-sd"
-          docker build -t chat-sd ./chat-sd/app -f ./chat-sd/app/Dockerfile
-
-          echo "▶ Building chat-web"
-          docker build -t chat-web ./chat-web/app -f ./chat-web/app/Dockerfile
-
-          echo "▶ Building chat-messages"
-          docker build -t chat-messages ./chat-messages/app -f ./chat-messages/app/Dockerfile
-
-          echo "▶ Building chat-ws"
-          docker build -t chat-ws ./chat-ws/app -f ./chat-ws/app/Dockerfile
-
-          echo "▶ Building chat-presence"
-          docker build -t chat-presence ./chat-presence/app -f ./chat-presence/app/Dockerfile
-
-          echo "▶ Building mesh-compose"
-          docker build -t mesh-compose ./mesh -f ./mesh/Dockerfile
-
-          echo "▶ Building init-cassandra"
-          docker build -t init-cassandra ./cassandra -f ./cassandra/init.Dockerfile
-
-      - name: Push images (only on main push)
+      - name: Log in to Docker Hub
         if: github.event_name == 'push'
-        run: |
-          docker tag chat-sd ${{ secrets.DOCKERHUB_USER }}/chat-sd:latest
-          docker tag chat-web ${{ secrets.DOCKERHUB_USER }}/chat-web:latest
-          docker tag chat-messages ${{ secrets.DOCKERHUB_USER }}/chat-messages:latest
-          docker tag chat-ws ${{ secrets.DOCKERHUB_USER }}/chat-ws:latest
-          docker tag chat-presence ${{ secrets.DOCKERHUB_USER }}/chat-presence:latest
-          docker tag mesh-compose ${{ secrets.DOCKERHUB_USER }}/mesh-compose:latest
-          docker tag init-cassandra ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-          docker push ${{ secrets.DOCKERHUB_USER }}/chat-sd:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/chat-web:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/chat-messages:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/chat-ws:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/chat-presence:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/mesh-compose:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
+      - name: Build and optionally push ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ github.event_name == 'push' && format('{0}/{1}:latest', secrets.DOCKERHUB_USER, matrix.service.name) || '' }}
