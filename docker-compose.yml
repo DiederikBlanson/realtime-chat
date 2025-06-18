@@ -182,14 +182,12 @@ services:
     restart: always
 
   prometheus:
-    image: prometheus # image: dedder98/prometheus:latest
-    # platform: linux/amd64
+    image: prom/prometheus:latest
     container_name: prometheus
-    build:
-      context: ./prometheus
-      dockerfile: Dockerfile
     ports:
       - "9090:9090"
+    volumes:
+      - ./prometheus/compose-config.yml:/etc/prometheus/prometheus.yml
     networks:
       - chat-net
       - elk-net

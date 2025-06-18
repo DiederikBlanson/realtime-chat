@@ -97,12 +97,3 @@ jobs:
           file: ./cassandra/init.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
-
-      # prometheus
-      - name: Build & Push prometheus
-        uses: docker/build-push-action@v5
-        with:
-          context: ./prometheus
-          file: ./prometheus/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/prometheus:latest
