@@ -138,6 +138,11 @@ or
 docker run \
     --name=grafana \
     -p 6767:3000 \
+    -e GF_SECURITY_ADMIN_USER=admin \
+    -e GF_SECURITY_ADMIN_PASSWORD=admin \
+    -e PROMETHEUS_URL=http://host.docker.internal:9090 \
+    -v $(pwd)/grafana/dashboards:/var/lib/grafana/dashboards \
+    -v $(pwd)/grafana/provisioning:/etc/grafana/provisioning \
     --network chat-net \
     grafana/grafana-oss:latest
 ```

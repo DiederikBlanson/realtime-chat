@@ -6,7 +6,7 @@ dotenv.config()
 export const composeConfig = defineConfig({
     subgraphs: [
         {
-            sourceHandler: loadGraphQLHTTPSubgraph('Chat-Messages', {
+            sourceHandler: loadGraphQLHTTPSubgraph('chat-messages', {
                 endpoint: `${process.env.MESSAGING_SERVICE_URL}/graphql`
             })
         }

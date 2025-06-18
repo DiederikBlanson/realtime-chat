@@ -8,5 +8,5 @@ dump.rdb
 
 .idea
 
-/grafana
 /prometheus/build
+.DS_Store
