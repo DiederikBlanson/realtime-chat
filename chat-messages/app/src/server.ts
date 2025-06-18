@@ -23,7 +23,12 @@ const graphqlRequestDuration = new client.Histogram({
     buckets: [0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5]
 })
 
-async function httpRequestContentLengthInBytes: [100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000,],
+async function startServer() {
+    const middleware = createMiddleware({
+        app,
+        options: {
+            metricBuckets: {
+                httpRequestContentLengthInBytes: [100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000,],
                 httpRequestDurationInSeconds: [0.05, 0.1, 0.3, 0.5, 0.8, 1, 1.5, 2, 3, 10],
             },
             metricPercentiles: {
