@@ -165,18 +165,17 @@ services:
       - init-cassandra
     restart: always
 
-  mesh:
-    # The url's in the supergraph.graphql are not localhost but the name of the services.
-    # Create a mesh-compose container and replace the url's in the schema.
-    image: mesh-compose
+  hive-gateway:
+    image: ghcr.io/graphql-hive/gateway
     container_name: mesh
     networks:
       - chat-net
       - elk-net
     ports:
       - "4000:4000"
-    environment:
-      - MESSAGING_SERVICE_URL=http://chat-messages:5678
+    volumes:
+      - ./mesh/supergraph-compose.graphql:/gateway/supergraph.graphql
+    command: supergraph /gateway/supergraph.graphql
     depends_on:
       - chat-messages
     restart: always

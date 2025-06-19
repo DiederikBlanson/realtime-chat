@@ -60,9 +60,6 @@ jobs:
           echo "▶ Building chat-presence"
           docker build -t chat-presence ./chat-presence/app -f ./chat-presence/app/Dockerfile
 
-          echo "▶ Building mesh-compose"
-          docker build -t mesh-compose ./mesh -f ./mesh/Dockerfile
-
           echo "▶ Building init-cassandra"
           docker build -t init-cassandra ./cassandra -f ./cassandra/init.Dockerfile
 
@@ -74,7 +71,6 @@ jobs:
           docker tag chat-messages ${{ secrets.DOCKERHUB_USER }}/chat-messages:latest
           docker tag chat-ws ${{ secrets.DOCKERHUB_USER }}/chat-ws:latest
           docker tag chat-presence ${{ secrets.DOCKERHUB_USER }}/chat-presence:latest
-          docker tag mesh-compose ${{ secrets.DOCKERHUB_USER }}/mesh-compose:latest
           docker tag init-cassandra ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
 
           docker push ${{ secrets.DOCKERHUB_USER }}/chat-sd:latest
@@ -82,5 +78,4 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USER }}/chat-messages:latest
           docker push ${{ secrets.DOCKERHUB_USER }}/chat-ws:latest
           docker push ${{ secrets.DOCKERHUB_USER }}/chat-presence:latest
-          docker push ${{ secrets.DOCKERHUB_USER }}/mesh-compose:latest
           docker push ${{ secrets.DOCKERHUB_USER }}/init-cassandra:latest
