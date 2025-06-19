@@ -175,6 +175,7 @@ services:
       - "4000:4000"
     volumes:
       - ./mesh/supergraph-compose.graphql:/gateway/supergraph.graphql
+      - ./mesh/gateway.config.ts:/gateway/gateway.config.ts
     command: supergraph /gateway/supergraph.graphql
     depends_on:
       - chat-messages
