@@ -44,6 +44,11 @@ services:
     build:
       context: ./cassandra
       dockerfile: init.Dockerfile
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "cqlsh cassandra -e 'DESCRIBE KEYSPACES' | grep -q '\\bchat\\b'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
     networks:
       - chat-net
       - elk-net
@@ -68,8 +73,10 @@ services:
       - REDIS_HOST=redis-container
       - REDIS_PORT=6379
     depends_on:
-      - redis-container
-      - init-cassandra
+      init-cassandra:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
     restart: always
 
   chat-messages:
@@ -91,8 +98,10 @@ services:
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5044
     depends_on:
-      - redis-container
-      - init-cassandra
+      init-cassandra:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
     restart: always
 
   chat-ws:
@@ -114,8 +123,10 @@ services:
       - PORT=4321
       - RABBITMQ_URL=amqp://rabbitmq
     depends_on:
-      - redis-container
-      - init-cassandra
+      init-cassandra:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
     restart: always
 
   chat-web:
@@ -161,8 +172,10 @@ services:
       - RABBITMQ_URL=amqp://rabbitmq
       - CASSANDRA_POINT=cassandra
     depends_on:
-      - redis-container
-      - init-cassandra
+      init-cassandra:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
     restart: always
 
   hive-gateway:
