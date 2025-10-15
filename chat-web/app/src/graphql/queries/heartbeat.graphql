@@ -1,0 +1,3 @@
+mutation Heartbeat($uid: String!) {
+    heartbeat(uid:$uid)
+}

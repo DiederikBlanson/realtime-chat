@@ -113,11 +113,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "graphql_envelop_request{operationName=\"Messages\"}",
+          "expr": "sum(graphql_envelop_request)",
           "legendFormat": "Total",
           "range": true,
           "refId": "A"
@@ -128,7 +128,7 @@
             "uid": "prometheus-ds"
           },
           "editorMode": "code",
-          "expr": "graphql_envelop_error_result{operationName=\"Messages\"}",
+          "expr": "sum(graphql_envelop_error_result)",
           "hide": false,
           "instant": false,
           "legendFormat": "Errors",
@@ -137,6 +137,198 @@
         }
       ],
       "title": "Graph total requests",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "(\n  sum by (operationName, operationType) (\n    rate(graphql_envelop_error_result[5m])\n  )\n)\n/\n(\n  sum by (operationName, operationType) (\n    rate(graphql_envelop_request[5m])\n  )\n)\n",
+          "legendFormat": "{{operationType}} {{operationName}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Operation error %",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "expr": "sum by (operationName, operationType) (rate(graphql_envelop_request_duration_sum[5m]))\n/\nsum by (operationName, operationType) (rate(graphql_envelop_request_duration_count[5m]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{operationType}} - {{operationName}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Gateway latency",
       "type": "timeseries"
     },
     {
@@ -203,18 +395,7 @@
               "id": "byFrameRefID",
               "options": "A"
             },
-            "properties": [
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "dash": [
-                    10,
-                    10
-                  ],
-                  "fill": "dash"
-                }
-              }
-            ]
+            "properties": []
           }
         ]
       },
@@ -222,7 +403,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 1
+        "y": 9
       },
       "id": 5,
       "options": {
@@ -238,27 +419,14 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(graphql_gateway_subgraph_execute_duration_sum[5m])\n/\nrate(graphql_gateway_subgraph_execute_duration_count[5m])",
+          "expr": "sum by (subgraphName) (\n  rate(graphql_gateway_subgraph_execute_duration_sum[5m])\n)\n/\nsum by (subgraphName) (\n  rate(graphql_gateway_subgraph_execute_duration_count[5m])\n)\n",
           "legendFormat": "{{subgraphName}}",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-ds"
-          },
-          "editorMode": "code",
-          "expr": "rate(graphql_envelop_request_duration_sum[5m])\n/\nrate(graphql_envelop_request_duration_count[5m])",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Gateway",
-          "range": true,
-          "refId": "B"
         }
       ],
       "title": "Subgraph latency",
@@ -270,7 +438,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 3,
       "panels": [],
@@ -341,7 +509,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 18
       },
       "id": 1,
       "options": {
@@ -357,7 +525,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -365,7 +533,7 @@
             "uid": "prometheus-ds"
           },
           "editorMode": "code",
-          "expr": "rate(graphql_request_duration_seconds_count[1m])",
+          "expr": "rate(graphql_request_duration_seconds_count{job=\"chat-messages\"}[5m])",
           "legendFormat": "{{operation_name}}",
           "range": true,
           "refId": "A"
@@ -375,17 +543,308 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "expr": "sum by (operation_name) (\n  rate(graphql_request_duration_seconds_sum{job=\"chat-messages\"}[5m])\n)\n/\nsum by (operation_name) (\n  rate(graphql_request_duration_seconds_count{job=\"chat-messages\"}[5m])\n)\n",
+          "legendFormat": "{{operation_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Graph latency",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 26
       },
       "id": 6,
       "panels": [],
       "title": "chat-presence",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "expr": "rate(graphql_request_duration_seconds_count{job=\"chat-presence\"}[5m])",
+          "legendFormat": "{{operation_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Graph RPS",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "expr": "sum by (operation_name) (\n  rate(graphql_request_duration_seconds_sum{job=\"chat-presence\"}[5m])\n)\n/\nsum by (operation_name) (\n  rate(graphql_request_duration_seconds_count{job=\"chat-presence\"}[5m])\n)\n",
+          "legendFormat": "{{operation_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Graph latency",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -453,7 +912,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 35
       },
       "id": 7,
       "options": {
@@ -469,7 +928,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -546,7 +1005,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 35
       },
       "id": 8,
       "options": {
@@ -562,11 +1021,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(http_request_duration_seconds_sum{job=\"chat-presence\", path=~\"/api.*\"}[1m])\n/\nrate(http_request_duration_seconds_count{job=\"chat-presence\", path=~\"/api.*\"}[1m])\n",
+          "expr": "rate(http_request_duration_seconds_sum{job=\"chat-presence\", path=~\"/api.*\"}[5m])\n/\nrate(http_request_duration_seconds_count{job=\"chat-presence\", path=~\"/api.*\"}[5m])\n",
           "legendFormat": "{{method}} - {{path}}",
           "range": true,
           "refId": "A"

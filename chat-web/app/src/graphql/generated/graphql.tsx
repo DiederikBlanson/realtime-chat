@@ -37,8 +37,19 @@ export enum MessageStatus {
   Send = 'SEND'
 }
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  heartbeat?: Maybe<Scalars['Boolean']['output']>;
+};
+
+
+export type MutationHeartbeatArgs = {
+  uid: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  _empty?: Maybe<Scalars['String']['output']>;
   messages: Array<Message>;
 };
 
@@ -46,6 +57,13 @@ export type Query = {
 export type QueryMessagesArgs = {
   name: Scalars['String']['input'];
 };
+
+export type HeartbeatMutationVariables = Exact<{
+  uid: Scalars['String']['input'];
+}>;
+
+
+export type HeartbeatMutation = { __typename?: 'Mutation', heartbeat?: boolean | null };
 
 export type MessagesQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -55,6 +73,37 @@ export type MessagesQueryVariables = Exact<{
 export type MessagesQuery = { __typename?: 'Query', messages: Array<{ __typename?: 'Message', from: string, id: string, status: MessageStatus, text: string, timestamp: any, to: string }> };
 
 
+export const HeartbeatDocument = gql`
+    mutation Heartbeat($uid: String!) {
+  heartbeat(uid: $uid)
+}
+    `;
+export type HeartbeatMutationFn = Apollo.MutationFunction<HeartbeatMutation, HeartbeatMutationVariables>;
+
+/**
+ * __useHeartbeatMutation__
+ *
+ * To run a mutation, you first call `useHeartbeatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useHeartbeatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [heartbeatMutation, { data, loading, error }] = useHeartbeatMutation({
+ *   variables: {
+ *      uid: // value for 'uid'
+ *   },
+ * });
+ */
+export function useHeartbeatMutation(baseOptions?: Apollo.MutationHookOptions<HeartbeatMutation, HeartbeatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<HeartbeatMutation, HeartbeatMutationVariables>(HeartbeatDocument, options);
+      }
+export type HeartbeatMutationHookResult = ReturnType<typeof useHeartbeatMutation>;
+export type HeartbeatMutationResult = Apollo.MutationResult<HeartbeatMutation>;
+export type HeartbeatMutationOptions = Apollo.BaseMutationOptions<HeartbeatMutation, HeartbeatMutationVariables>;
 export const MessagesDocument = gql`
     query Messages($name: String!) {
   messages(name: $name) {

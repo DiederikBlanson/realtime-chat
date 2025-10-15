@@ -10,7 +10,7 @@ schema
     
   {
     query: Query
-    
+    mutation: Mutation
     
   }
 
@@ -85,15 +85,17 @@ schema
   
   
 enum join__Graph {
-  CHAT_MESSAGES @join__graph(name: "chat-messages", url: "http://localhost:5678/graphql")
+  CHAT_MESSAGES @join__graph(name: "chat-messages", url: "http://localhost:5678/graphql") 
+  CHAT_PRESENCE @join__graph(name: "chat-presence", url: "http://localhost:7777/graphql") 
 }
 
 scalar Date @join__type(graph: CHAT_MESSAGES) 
 
-scalar TransportOptions @join__type(graph: CHAT_MESSAGES) 
+scalar TransportOptions @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE) 
 
-type Query @join__type(graph: CHAT_MESSAGES)  {
-  messages(name: String!) : [Message!]!
+type Query @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE)  {
+  messages(name: String!) : [Message!]! @join__field(graph: CHAT_MESSAGES) 
+  _empty: String @join__field(graph: CHAT_PRESENCE) 
 }
 
 type Message @join__type(graph: CHAT_MESSAGES)  {
@@ -103,6 +105,10 @@ type Message @join__type(graph: CHAT_MESSAGES)  {
   to: String!
   status: MessageStatus!
   timestamp: Date!
+}
+
+type Mutation @join__type(graph: CHAT_PRESENCE)  {
+  heartbeat(uid: String!) : Boolean
 }
 
 enum MessageStatus @join__type(graph: CHAT_MESSAGES)  {

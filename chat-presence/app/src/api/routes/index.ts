@@ -2,11 +2,11 @@ import express from 'express'
 import { Request, Response, NextFunction } from 'express'
 import amqp from 'amqplib'
 import DataModel from '../../model/dataModel'
-import { ContactStatus, UserStatus, WSStatusUpdate } from '@shared/types'
+import { ContactStatus } from '@shared/types'
+import { handleHeartbeat} from '../../controller'
 
 const dataModel = new DataModel()
 const router = express.Router()
-const onlineStatus: UserStatus = 'ONLINE'
 const EXPIRATION_QUEUE_TIMEOUT = 30000
 
 // This route handles a POST request to '/heartbeat' to monitor user activity and online status. When a user's client
@@ -15,44 +15,13 @@ router
     .route('/heartbeat')
     .post(async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // Update the user's 'ONLINE' status and last active timestamp in the database
-            await dataModel.setOnline(req.body.uid)
-
-            // TODO: only if the user was previously OFFLINE, we would need to send an update.
-            // Otherwise it might be a waste of resources.
-
-            // Establish a connection to RabbitMQ for messaging.
-            const rabbitMQConnection = await amqp.connect(
-                process.env.RABBITMQ_URL as string
-            )
-            const rabbitMQChannel = await rabbitMQConnection.createChannel()
-
-            // Define the fanout exchange for this user's activity updates.
-            const fanoutQueue = `${req.body.uid}-activity`
-            await rabbitMQChannel.assertExchange(fanoutQueue, 'fanout', {
-                durable: false
-            })
-
-            // Prepare a status update message with the user's new 'ONLINE' status and current timestamp.
-            // Publish the status update to the fanout exchange, ensuring it reaches all interested parties.
-            const msg: WSStatusUpdate = {
-                type: 'statusUpdate',
-                data: {
-                    user: req.body.uid,
-                    status: onlineStatus,
-                    last_active_at: new Date()
-                }
-            }
-            await rabbitMQChannel.publish(
-                fanoutQueue,
-                '',
-                Buffer.from(JSON.stringify(msg))
-            )
+            await handleHeartbeat(req.body.uid as string)
             return res.status(200).send()
         } catch (e) {
             console.log(e)
         }
     })
+
 
 // This route handles a POST request to '/subscribe-to-other' to set up and manage the user's
 // subscription to another user's status.

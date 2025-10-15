@@ -18,6 +18,10 @@ import Contacts from './Contacts'
 import Chat from './Chat'
 import axios from 'axios'
 import getConfig from '../../utils/js/getConfig'
+import { client } from '../../graphql/connect'
+import { HeartbeatDocument, MessagesDocument } from '../../graphql/generated/graphql'
+
+const useGraph = getConfig("VITE_APP_ENABLE_GRAPH") == "true"
 
 const fetchedUsers = [
     {
@@ -248,12 +252,21 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
             if (!(wsRef.current && wsRef.current.readyState === WebSocket.OPEN))
                 return
 
-            await axios.post(
-                `${getConfig("VITE_APP_PRESENCE_URL")}/api/heartbeat`,
-                {
-                    uid
-                }
-            )
+            if (useGraph){
+                await client.mutate({
+                    mutation: HeartbeatDocument,
+                    variables: {
+                        uid: name,
+                    }
+                })
+            } else {
+                await axios.post(
+                    `${getConfig("VITE_APP_PRESENCE_URL")}/api/heartbeat`,
+                    {
+                        uid
+                    }
+                )
+            }
         }, HEARTBEAT_INTERVAL)
 
         return () => clearTimeout(heartbeat)
