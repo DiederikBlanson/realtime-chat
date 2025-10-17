@@ -55,6 +55,7 @@ services:
     depends_on:
       - cassandra
     restart: "no"
+    command: ["bash", "-c", "/init.sh && exit 0"]
 
   chat-sd:
     image: chat-sd # dedder98/chat-sd:latest
@@ -74,7 +75,7 @@ services:
       - REDIS_PORT=6379
     depends_on:
       init-cassandra:
-        condition: service_healthy
+        condition: service_completed_successfully
       redis-container:
         condition: service_started
     restart: always
@@ -99,7 +100,7 @@ services:
       - LOGSTASH_PORT=5044
     depends_on:
       init-cassandra:
-        condition: service_healthy
+        condition: service_completed_successfully
       redis-container:
         condition: service_started
     restart: always
@@ -124,7 +125,7 @@ services:
       - RABBITMQ_URL=amqp://rabbitmq
     depends_on:
       init-cassandra:
-        condition: service_healthy
+        condition: service_completed_successfully
       redis-container:
         condition: service_started
     restart: always
@@ -173,7 +174,7 @@ services:
       - CASSANDRA_POINT=cassandra
     depends_on:
       init-cassandra:
-        condition: service_healthy
+        condition: service_completed_successfully
       redis-container:
         condition: service_started
     restart: always
@@ -187,7 +188,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ./mesh/supergraph-compose.graphql:/gateway/supergraph.graphql
+      - ./mesh/supergraph-docker.graphql:/gateway/supergraph.graphql
       - ./mesh/gateway.config.ts:/gateway/gateway.config.ts
     command: supergraph /gateway/supergraph.graphql
     depends_on:

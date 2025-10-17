@@ -5,6 +5,5 @@ generates:
       - "typescript"
       - "typescript-resolvers"
     config:
-      contextType: "./context#GraphQLContext"
       scalars:
         Date: Date
