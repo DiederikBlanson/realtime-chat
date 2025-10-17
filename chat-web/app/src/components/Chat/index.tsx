@@ -19,7 +19,10 @@ import Chat from './Chat'
 import axios from 'axios'
 import getConfig from '../../utils/js/getConfig'
 import { client } from '../../graphql/connect'
-import { HeartbeatDocument, MessagesDocument } from '../../graphql/generated/graphql'
+import {
+    HeartbeatDocument,
+    SubscribeToOtherDocument,
+} from '../../graphql/generated/graphql'
 
 const useGraph = getConfig("VITE_APP_ENABLE_GRAPH") == "true"
 
@@ -178,9 +181,8 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
     // Service Discovery, and instead obtain the Websocket from an environment variable.
 
     const getSocket = async () => {
-        if (getConfig("VITE_APP_DISABLE_CHAT_SD") == "true"){
+        if (getConfig("VITE_APP_DISABLE_CHAT_SD") == "true")
             return getConfig("VITE_APP_WS_URL")
-        }
 
         const sd = await fetch(
             `${getConfig("VITE_APP_SERVICE_DISCOVERY_URL")}/api/ws-server`
@@ -218,20 +220,36 @@ const App: React.FC<ChatProps> = ({ name, retrievedMessages, uuid }) => {
 
         // Define an asynchronous function to fetch status updates for the selected user.
         const update = async () => {
-            const d = await axios.post(
-                `${
-                    getConfig("VITE_APP_PRESENCE_URL")
-                }/api/subscribe-to-other`,
-                {
-                    uid,
-                    uuid,
-                    user: convId
-                }
-            )
-            const { data } = d
+
+            var result: any = null
+
+            if (useGraph){
+                const q = await client.mutate({
+                    mutation: SubscribeToOtherDocument,
+                    variables: {
+                        user: uid,
+                        uuid,
+                        to: convId,
+                    }
+                })
+                result = q.data.subscribeToOther
+            } else {
+                const d = await axios.post(
+                    `${
+                        getConfig("VITE_APP_PRESENCE_URL")
+                    }/api/subscribe-to-other`,
+                    {
+                        uid,
+                        uuid,
+                        user: convId
+                    }
+                )
+                result = d.data
+            }
+
             setStatuses((prev) => ({
                 ...prev,
-                [convId]: data
+                [convId]: result
             }))
         }
         if (convId) update()

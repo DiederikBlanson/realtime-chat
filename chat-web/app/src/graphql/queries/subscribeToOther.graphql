@@ -1,0 +1,7 @@
+mutation SubscribeToOther($user: String!, $uuid: String!, $to: String!) {
+    subscribeToOther(user: $user, uuid: $uuid, to: $to){
+        user
+        status
+        last_active_at
+    }
+}

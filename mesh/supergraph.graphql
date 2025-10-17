@@ -89,13 +89,13 @@ enum join__Graph {
   CHAT_PRESENCE @join__graph(name: "chat-presence", url: "http://localhost:7777/graphql") 
 }
 
-scalar Date @join__type(graph: CHAT_MESSAGES) 
+scalar Date @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE) 
 
 scalar TransportOptions @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE) 
 
 type Query @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE)  {
   messages(name: String!) : [Message!]! @join__field(graph: CHAT_MESSAGES) 
-  _empty: String @join__field(graph: CHAT_PRESENCE) 
+  empty: String @join__field(graph: CHAT_PRESENCE) 
 }
 
 type Message @join__type(graph: CHAT_MESSAGES)  {
@@ -107,8 +107,15 @@ type Message @join__type(graph: CHAT_MESSAGES)  {
   timestamp: Date!
 }
 
+type Contact @join__type(graph: CHAT_PRESENCE)  {
+  user: String!
+  status: ContactStatus!
+  last_active_at: Date!
+}
+
 type Mutation @join__type(graph: CHAT_PRESENCE)  {
   heartbeat(uid: String!) : Boolean
+  subscribeToOther(user: String!, uuid: String!, to: String!) : Contact
 }
 
 enum MessageStatus @join__type(graph: CHAT_MESSAGES)  {
@@ -117,4 +124,9 @@ enum MessageStatus @join__type(graph: CHAT_MESSAGES)  {
   SEND @join__enumValue(graph: CHAT_MESSAGES) 
   RECEIVED @join__enumValue(graph: CHAT_MESSAGES) 
   READ @join__enumValue(graph: CHAT_MESSAGES) 
+}
+
+enum ContactStatus @join__type(graph: CHAT_PRESENCE)  {
+  ONLINE @join__enumValue(graph: CHAT_PRESENCE) 
+  OFFLINE @join__enumValue(graph: CHAT_PRESENCE) 
 }

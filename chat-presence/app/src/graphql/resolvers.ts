@@ -1,18 +1,15 @@
-import { handleHeartbeat} from '../controller'
+import { handleHeartbeat, subscribeToOther } from '../controller'
+import { Contact } from '../generated/graphql'
 
 const resolvers = {
     Mutation: {
-        heartbeat: async (_: any, args: any) => {
-            // Simulate 40% failure rate
-            const shouldFail = Math.random() < 0.4
-
-            if (shouldFail) {
-                throw new Error("Simulated random error (40%)")
-            }
-
+        heartbeat: async (_: any, args: any): Promise<boolean> => {
             await handleHeartbeat(args.uid as string)
             return true
-        }
+        },
+
+        subscribeToOther: async (_: any, args: any): Promise<Contact | null> =>
+            await subscribeToOther(args.user, args.uuid, args.to)
     }
 }
 

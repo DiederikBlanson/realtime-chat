@@ -2,10 +2,10 @@
 
 **Why It Matters**
 
-In a world where chat applications like WhatsApp became the primary sources of communication, ensuring reliability and availability of these systems is very critical. Take for instance the WhatsApp outage in October 2022, which affected 2 billion users world-wide ([source](https://www.livemint.com/news/world/whatsapp-down-top-5-outages-that-disrupted-the-world-11666687792717.html)). 
+In a world where chat applications like WhatsApp have become one of the main ways people communicate, ensuring reliability and availability of these systems is critical. Take for instance the WhatsApp outage in October 2022, which affected 2 billion users world-wide ([source](https://www.livemint.com/news/world/whatsapp-down-top-5-outages-that-disrupted-the-world-11666687792717.html)). 
 
 
-From the perspective of a software engineer, the challenge of designing a chat application that is not only robust but can also handle the demands of a growing user base is interesting. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
+From the perspective of a software engineer, building a chat app that is not just reliable but can also scale as more users join is a pretty cool challenge. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
 
 I will define our project's scope and requirements, sketch out a high-level system design, build a working prototype, and finally, present potential bottlenecks and strategies to solve these issues.
 

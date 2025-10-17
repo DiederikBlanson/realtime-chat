@@ -18,6 +18,14 @@ const config: CodegenConfig = {
                 'typescript-operations',
                 'typescript-react-apollo'
             ],
+            config: {
+                scalars: {
+                    Date: 'Date',
+                },
+                withHooks: true,
+                withHOC: false,
+                withComponent: false,
+            },
         },
     },
 };
