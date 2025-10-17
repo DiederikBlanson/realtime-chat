@@ -3,13 +3,9 @@ import './index.css'
 import './style.scss'
 import App from './components/App'
 import reportWebVitals from './reportWebVitals'
-import { ApolloProvider } from '@apollo/client'
-import { client } from './graphql/connect'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
-root.render( <ApolloProvider client={client}>
-    <App />
-</ApolloProvider>)
+root.render(<App />)
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
