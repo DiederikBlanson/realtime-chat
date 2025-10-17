@@ -15,9 +15,21 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Date: { input: any; output: any; }
+  Date: { input: Date; output: Date; }
   TransportOptions: { input: any; output: any; }
 };
+
+export type Contact = {
+  __typename?: 'Contact';
+  last_active_at: Scalars['Date']['output'];
+  status: ContactStatus;
+  user: Scalars['String']['output'];
+};
+
+export enum ContactStatus {
+  Offline = 'OFFLINE',
+  Online = 'ONLINE'
+}
 
 export type Message = {
   __typename?: 'Message';
@@ -37,8 +49,27 @@ export enum MessageStatus {
   Send = 'SEND'
 }
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  heartbeat?: Maybe<Scalars['Boolean']['output']>;
+  subscribeToOther?: Maybe<Contact>;
+};
+
+
+export type MutationHeartbeatArgs = {
+  uid: Scalars['String']['input'];
+};
+
+
+export type MutationSubscribeToOtherArgs = {
+  to: Scalars['String']['input'];
+  user: Scalars['String']['input'];
+  uuid: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  empty?: Maybe<Scalars['String']['output']>;
   messages: Array<Message>;
 };
 
@@ -47,14 +78,61 @@ export type QueryMessagesArgs = {
   name: Scalars['String']['input'];
 };
 
+export type HeartbeatMutationVariables = Exact<{
+  uid: Scalars['String']['input'];
+}>;
+
+
+export type HeartbeatMutation = { __typename?: 'Mutation', heartbeat?: boolean | null };
+
 export type MessagesQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
-export type MessagesQuery = { __typename?: 'Query', messages: Array<{ __typename?: 'Message', from: string, id: string, status: MessageStatus, text: string, timestamp: any, to: string }> };
+export type MessagesQuery = { __typename?: 'Query', messages: Array<{ __typename?: 'Message', from: string, id: string, status: MessageStatus, text: string, timestamp: Date, to: string }> };
+
+export type SubscribeToOtherMutationVariables = Exact<{
+  user: Scalars['String']['input'];
+  uuid: Scalars['String']['input'];
+  to: Scalars['String']['input'];
+}>;
 
 
+export type SubscribeToOtherMutation = { __typename?: 'Mutation', subscribeToOther?: { __typename?: 'Contact', user: string, status: ContactStatus, last_active_at: Date } | null };
+
+
+export const HeartbeatDocument = gql`
+    mutation Heartbeat($uid: String!) {
+  heartbeat(uid: $uid)
+}
+    `;
+export type HeartbeatMutationFn = Apollo.MutationFunction<HeartbeatMutation, HeartbeatMutationVariables>;
+
+/**
+ * __useHeartbeatMutation__
+ *
+ * To run a mutation, you first call `useHeartbeatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useHeartbeatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [heartbeatMutation, { data, loading, error }] = useHeartbeatMutation({
+ *   variables: {
+ *      uid: // value for 'uid'
+ *   },
+ * });
+ */
+export function useHeartbeatMutation(baseOptions?: Apollo.MutationHookOptions<HeartbeatMutation, HeartbeatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<HeartbeatMutation, HeartbeatMutationVariables>(HeartbeatDocument, options);
+      }
+export type HeartbeatMutationHookResult = ReturnType<typeof useHeartbeatMutation>;
+export type HeartbeatMutationResult = Apollo.MutationResult<HeartbeatMutation>;
+export type HeartbeatMutationOptions = Apollo.BaseMutationOptions<HeartbeatMutation, HeartbeatMutationVariables>;
 export const MessagesDocument = gql`
     query Messages($name: String!) {
   messages(name: $name) {
@@ -100,3 +178,40 @@ export type MessagesQueryHookResult = ReturnType<typeof useMessagesQuery>;
 export type MessagesLazyQueryHookResult = ReturnType<typeof useMessagesLazyQuery>;
 export type MessagesSuspenseQueryHookResult = ReturnType<typeof useMessagesSuspenseQuery>;
 export type MessagesQueryResult = Apollo.QueryResult<MessagesQuery, MessagesQueryVariables>;
+export const SubscribeToOtherDocument = gql`
+    mutation SubscribeToOther($user: String!, $uuid: String!, $to: String!) {
+  subscribeToOther(user: $user, uuid: $uuid, to: $to) {
+    user
+    status
+    last_active_at
+  }
+}
+    `;
+export type SubscribeToOtherMutationFn = Apollo.MutationFunction<SubscribeToOtherMutation, SubscribeToOtherMutationVariables>;
+
+/**
+ * __useSubscribeToOtherMutation__
+ *
+ * To run a mutation, you first call `useSubscribeToOtherMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToOtherMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [subscribeToOtherMutation, { data, loading, error }] = useSubscribeToOtherMutation({
+ *   variables: {
+ *      user: // value for 'user'
+ *      uuid: // value for 'uuid'
+ *      to: // value for 'to'
+ *   },
+ * });
+ */
+export function useSubscribeToOtherMutation(baseOptions?: Apollo.MutationHookOptions<SubscribeToOtherMutation, SubscribeToOtherMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubscribeToOtherMutation, SubscribeToOtherMutationVariables>(SubscribeToOtherDocument, options);
+      }
+export type SubscribeToOtherMutationHookResult = ReturnType<typeof useSubscribeToOtherMutation>;
+export type SubscribeToOtherMutationResult = Apollo.MutationResult<SubscribeToOtherMutation>;
+export type SubscribeToOtherMutationOptions = Apollo.BaseMutationOptions<SubscribeToOtherMutation, SubscribeToOtherMutationVariables>;

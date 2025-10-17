@@ -8,8 +8,11 @@ RUN yarn install
 COPY . .
 RUN sed -i 's#"@shared/\*": \["\.\./\.\./\.\./\.\./shared/\*"\]#"@shared/\*": \["shared/\*"\]#' tsconfig.json
 
+RUN yarn run generate
 RUN yarn run build
 ENV NODE_PATH=./build/api
+
+COPY src/graphql/schema.graphql build/graphql/schema.graphql
 
 EXPOSE 7777
 

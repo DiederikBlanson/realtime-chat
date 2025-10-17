@@ -9,6 +9,11 @@ export const composeConfig = defineConfig({
             sourceHandler: loadGraphQLHTTPSubgraph('chat-messages', {
                 endpoint: `${process.env.MESSAGING_SERVICE_URL}/graphql`
             })
+        },
+        {
+            sourceHandler: loadGraphQLHTTPSubgraph('chat-presence', {
+                endpoint: `${process.env.MESSAGING_PRESENCE_URL}/graphql`
+            })
         }
     ],
     fetch

@@ -77,6 +77,7 @@ You can add more WebSocket servers by running PORT={other_port} npm run dev in a
 ```bash
 cd chat-web/app
 npm install
+npm run generate
 npm start
 ```
 
@@ -86,6 +87,7 @@ npm start
 ```bash
 cd chat-presence/app
 npm install
+npm run generate
 npm run dev
 ```
 
@@ -94,6 +96,7 @@ npm run dev
 
 ```bash
 cd mesh
+npm install
 npx mesh-compose -o supergraph.graphql
 npx hive-gateway supergraph
 ```

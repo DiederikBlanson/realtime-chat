@@ -1,0 +1,22 @@
+scalar Date
+
+type Query {
+    empty: String
+}
+
+enum ContactStatus {
+    ONLINE
+    OFFLINE
+}
+
+type Contact {
+    user: String!
+    status: ContactStatus!
+    last_active_at: Date!
+}
+
+type Mutation {
+    heartbeat(uid: String!): Boolean
+    subscribeToOther(user: String!, uuid: String!, to: String!): Contact
+}
+

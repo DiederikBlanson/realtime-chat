@@ -31,7 +31,9 @@ export const gatewayConfig = defineConfig({
             graphql_envelop_phase_execute: true,
             graphql_envelop_phase_subscribe: true,
             graphql_envelop_schema_change: true,
-            graphql_yoga_http_duration: true
-        }
+            graphql_yoga_http_duration: true,
+            graphql_envelop_execute_resolver: true,
+        },
+        skipIntrospection: false
     }
 })

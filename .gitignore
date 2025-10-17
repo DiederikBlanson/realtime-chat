@@ -10,3 +10,5 @@ dump.rdb
 
 /prometheus/build
 .DS_Store
+
+chat-presence/app/src/generated

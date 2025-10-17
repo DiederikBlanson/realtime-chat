@@ -1,25 +1,25 @@
 schema
     @link(url: "https://specs.apollo.dev/link/v1.0")
     @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
   {
     query: Query
-
-
+    mutation: Mutation
+    
   }
 
-
+  
     directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
     directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
-
+    
       directive @join__field(
         graph: join__Graph
         requires: join__FieldSet
@@ -28,11 +28,11 @@ schema
         external: Boolean
         override: String
         usedOverridden: Boolean
-
-
+        
+        
       ) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
-
-
+    
+    
 
     directive @join__implements(
       graph: join__Graph!
@@ -53,9 +53,9 @@ schema
     ) repeatable on UNION
 
     scalar join__FieldSet
-
-
-
+    
+  
+  
   directive @link(
     url: String
     as: String
@@ -77,23 +77,25 @@ schema
     EXECUTION
   }
 
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
 enum join__Graph {
   CHAT_MESSAGES @join__graph(name: "chat-messages", url: "http://chat-messages:5678/graphql")
+  CHAT_PRESENCE @join__graph(name: "chat-presence", url: "http://chat-presence:7777/graphql")
 }
 
-scalar Date @join__type(graph: CHAT_MESSAGES)
+scalar Date @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE) 
 
-scalar TransportOptions @join__type(graph: CHAT_MESSAGES)
+scalar TransportOptions @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE) 
 
-type Query @join__type(graph: CHAT_MESSAGES)  {
-  messages(name: String!) : [Message!]!
+type Query @join__type(graph: CHAT_MESSAGES)  @join__type(graph: CHAT_PRESENCE)  {
+  messages(name: String!) : [Message!]! @join__field(graph: CHAT_MESSAGES) 
+  empty: String @join__field(graph: CHAT_PRESENCE) 
 }
 
 type Message @join__type(graph: CHAT_MESSAGES)  {
@@ -105,10 +107,26 @@ type Message @join__type(graph: CHAT_MESSAGES)  {
   timestamp: Date!
 }
 
+type Contact @join__type(graph: CHAT_PRESENCE)  {
+  user: String!
+  status: ContactStatus!
+  last_active_at: Date!
+}
+
+type Mutation @join__type(graph: CHAT_PRESENCE)  {
+  heartbeat(uid: String!) : Boolean
+  subscribeToOther(user: String!, uuid: String!, to: String!) : Contact
+}
+
 enum MessageStatus @join__type(graph: CHAT_MESSAGES)  {
-  QUEUE @join__enumValue(graph: CHAT_MESSAGES)
-  AWAITING @join__enumValue(graph: CHAT_MESSAGES)
-  SEND @join__enumValue(graph: CHAT_MESSAGES)
-  RECEIVED @join__enumValue(graph: CHAT_MESSAGES)
-  READ @join__enumValue(graph: CHAT_MESSAGES)
+  QUEUE @join__enumValue(graph: CHAT_MESSAGES) 
+  AWAITING @join__enumValue(graph: CHAT_MESSAGES) 
+  SEND @join__enumValue(graph: CHAT_MESSAGES) 
+  RECEIVED @join__enumValue(graph: CHAT_MESSAGES) 
+  READ @join__enumValue(graph: CHAT_MESSAGES) 
+}
+
+enum ContactStatus @join__type(graph: CHAT_PRESENCE)  {
+  ONLINE @join__enumValue(graph: CHAT_PRESENCE) 
+  OFFLINE @join__enumValue(graph: CHAT_PRESENCE) 
 }
