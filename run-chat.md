@@ -87,6 +87,7 @@ npm start
 ```bash
 cd chat-presence/app
 npm install
+npm run generate
 npm run dev
 ```
 
