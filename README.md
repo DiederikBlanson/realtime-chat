@@ -1,19 +1,12 @@
 # Building a Scalable Chat Application
 
-**Why It Matters**
+In a world where chat applications like WhatsApp have become one of the main ways people communicate, ensuring reliability and availability of these systems is critical. From the perspective of a software engineer, building a chat app that is not just reliable but can also scale as more users join is a pretty cool challenge. 
 
-In a world where chat applications like WhatsApp have become one of the main ways people communicate, ensuring reliability and availability of these systems is critical. Take for instance the WhatsApp outage in October 2022, which affected 2 billion users world-wide ([source](https://www.livemint.com/news/world/whatsapp-down-top-5-outages-that-disrupted-the-world-11666687792717.html)). 
-
-
-From the perspective of a software engineer, building a chat app that is not just reliable but can also scale as more users join is a pretty cool challenge. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
+The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
 
 I will define our project's scope and requirements, sketch out a high-level system design, build a working prototype, and finally, present potential bottlenecks and strategies to solve these issues.
 
-**Disclaimer**
-
-Before going into technical details, it is important to note that the application I developed is best suited for prototyping purposes. It lacks data validation and other features that are required for production environments.
-
-<br/><br/>
+<br/>
 ## Scope
 
 In this project I focus on the core components required for a functional prototype of a simple chat system. It is not my goal to create advanced features for the end users, but instead focus more on availability and scalability of the whole system.
@@ -34,10 +27,10 @@ In this project I focus on the core components required for a functional prototy
 - High availability, ensuring a good chat experience.
 - Scalability that can effortlessly tackle increasing system load.
 
-<br/><br/>
+<br/>
 ## Technical design
 
-Building a scalable chat application involves a set of design and technological choices. In this chapter, I will discuss each component in our architecture that addresses the core challenges of scalability and real-time communication.
+Building a scalable chat application involves a set of design and technological choices. In this chapter, I will discuss each component in our architecture that addresses the challenges of scalability and real-time communication.
 
 ### Technical Architecture
 
