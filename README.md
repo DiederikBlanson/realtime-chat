@@ -33,7 +33,7 @@ I will define our project's scope and requirements, sketch out a high-level syst
 
 The technical architecture is a set of interconnected components, each playing a crucial role in creating the chat application:
 
-- **Client**: The frontend application is accessible in the user's browser.
+- **Web Client**: The frontend application is accessible in the user's browser.
 - **Federated GraphQL Gateway**: This will serve as the entrypoint to the different microservices by creating one unified API (WIP). 
 - **Chat Server (WS)**: This service establishes a bidirectional channel for communication between users, enabling real-time chats.
 - **Service Discovery**: A service responsible for routing users to available WebSocket servers, ensuring load balancing.
@@ -43,6 +43,8 @@ The technical architecture is a set of interconnected components, each playing a
 - **Chats DB**: All messages are stored in a Cassandra key-value database.
 - **Presence Service**: Users receive real-time updates on the online and last seen status of others.
 - **Presence DB**: The status of each user is stored in a Cassandra database.
+- **Logging**: Enable storing and displaying logs with the ELK stack (ElasticSearch, Logstash, Kibana).
+- **Monitoring**: Enable monitoring for backend services, metrics stored in Prometheus and visualisation with Grafana. 
 
 ### A functional chat
 I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React (Vite) due to my familiarity with the framework and the speed it offers for building interfaces. 
@@ -145,6 +147,10 @@ In the example above, we have logged in as **rafa**, and as a result, we can see
 In the chat interface, you will notice essential details such as when the user was last active and a record of the messages you have exchanged. Each message has a status indicator, indicating whether the message was sent, received, or read. Now, let's proceed by receiving a message from **novak**.
 
 ![New message from novak](docs/prototype-4.png)
+
+For the Grafana monitoring, go to http://localhost:6767 (username and password is 'admin', select dashboard "Realtime-Chat"). You can see the throughput and latency of the GraphQL gateway as well as the underlying backend services.
+
+![Grafana monitoring](docs/monitoring.jpg)
 
 <br/><br/>
 ## Bottlenecks & Optimisations: Inefficient chat database
