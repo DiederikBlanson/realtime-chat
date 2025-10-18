@@ -1,22 +1,12 @@
 # Building a Scalable Chat Application
 
-**Why It Matters**
+In a world where chat applications like WhatsApp have become one of the main ways people communicate, ensuring reliability and availability of these systems is critical. From the perspective of a software engineer, building a chat app that is not just reliable but can also scale as more users join is a pretty cool challenge. 
 
-In a world where chat applications like WhatsApp have become one of the main ways people communicate, ensuring reliability and availability of these systems is critical. Take for instance the WhatsApp outage in October 2022, which affected 2 billion users world-wide ([source](https://www.livemint.com/news/world/whatsapp-down-top-5-outages-that-disrupted-the-world-11666687792717.html)). 
-
-
-From the perspective of a software engineer, building a chat app that is not just reliable but can also scale as more users join is a pretty cool challenge. The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
+The book "System Design Interview" by Alex Xu describes high-level concepts for solving problems of these large-scale chat systems, inspiring me to investigate a chat application with scalability at its core.
 
 I will define our project's scope and requirements, sketch out a high-level system design, build a working prototype, and finally, present potential bottlenecks and strategies to solve these issues.
 
-**Disclaimer**
-
-Before going into technical details, it is important to note that the application I developed is best suited for prototyping purposes. It lacks data validation and other features that are required for production environments.
-
-<br/><br/>
 ## Scope
-
-In this project I focus on the core components required for a functional prototype of a simple chat system. It is not my goal to create advanced features for the end users, but instead focus more on availability and scalability of the whole system.
 
 **Functional requirements**
 
@@ -27,24 +17,21 @@ In this project I focus on the core components required for a functional prototy
 - Real-time tracking of user online/offline status.
 - Storing and updating chat messages.
 
-******************************************************Non-functional requirements******************************************************
+**Non-functional requirements**
 
-- High performance with minimal latency.
+- High performance and low latency.
 - Reliability.
 - High availability, ensuring a good chat experience.
-- Scalability that can effortlessly tackle increasing system load.
+- Scalability, effortless tackle increasing system load.
 
-<br/><br/>
+
 ## Technical design
 
-Building a scalable chat application involves a set of design and technological choices. In this chapter, I will discuss each component in our architecture that addresses the core challenges of scalability and real-time communication.
-
-### Technical Architecture
 
 ![Technical Architecture](docs/architecture.jpg)
 
 
-Our technical architecture is a set of interconnected components, each playing a crucial role in creating the chat application:
+The technical architecture is a set of interconnected components, each playing a crucial role in creating the chat application:
 
 - **Client**: The frontend application is accessible in the user's browser.
 - **Federated GraphQL Gateway**: This will serve as the entrypoint to the different microservices by creating one unified API (WIP). 
@@ -58,9 +45,9 @@ Our technical architecture is a set of interconnected components, each playing a
 - **Presence DB**: The status of each user is stored in a Cassandra database.
 
 ### A functional chat
-I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React (Vite) due to my familiarity with the framework and the speed it offers for building interfaces, with Cypress for E2E-testing of chat functionalities. 
+I started with creating a simple UI, the **************Client************** service, which establishes connections with other users via the ********************WebSocket******************** service. These two essential components form the foundation of the chat application, facilitating user-to-user communication. For prototyping, I chose React (Vite) due to my familiarity with the framework and the speed it offers for building interfaces. 
 
-WebSockets emerged as the communication method of choice. Their persistent, bidirectional connection enables efficient data exchange between clients and the server. While various WebSocket libraries exist, I opted for the native JavaScript WebSocket module for simplicity. One drawback of the native approach is the absence of automatic reconnection to the WebSocket server. As a solution, the client attempts to reconnect every 1000ms when the connection is lost.
+WebSockets are chosen for the realtime communication. Their persistent, bidirectional connection enables efficient data exchange between clients and the server. While various WebSocket libraries exist, I opted for the native JavaScript WebSocket module for simplicity. One drawback of the native approach is the absence of automatic reconnection to the WebSocket server. As a solution, the client attempts to reconnect every 1000ms when the connection is lost.
 
 ### Scaling WebSockets
 However, a single WebSocket is not sufficient for serving millions of users. This would put much stress on the WebSocket server and result in a Single Point Of Failure (SPOF), where server downtime could disrupt the entire service. To address this, I developed the **Service Discovery** service, responsible for distributing the user load across multiple WebSocket servers. 
@@ -71,13 +58,13 @@ For our prototype, I used a round-robin approach to balance the load among WebSo
 WebSocket servers can go down, making it crucial to avoid routing users to inactive servers. To tackle this challenge, the **Service Discovery DB** is created, a key-value store tracking the status of each server. Instead of directly checking server status in the Service Discovery service, the gossip protocol is implemented. In this protocol, every WebSocket server sends heartbeats at regular intervals to a random set of WebSocket servers. These servers maintain an internal data structure to track the received heartbeats. Periodically, each WebSocket server checks the latest heartbeat timestamp from the servers it received heartbeats from. If this timestamp exceeds a certain threshold (e.g., 30000ms), the WebSocket server contacts other servers to determine if the server is genuinely offline. If no other servers confirm activity, the server is considered down.
 
 ### Message queues
-Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I chose to use RabbitMQ, a queuing technology highlighted in the System Design book. Additionally, I found it straightforward to implement a running RabbitMQ cluster with NodeJS. (TODO: add picture of message flow user A to user B)
+Now that we have successfully scaled our WebSockets, a new challenge arises - how do clients communicate when they might be connected to different WebSocket servers? This led to the introduction of a **Message Queue**. All messages are routed to this queue and distributed accordingly. In our prototype, I chose to use RabbitMQ, a queuing technology highlighted in the System Design book.
 
-It is essential to distinguish the terminologies of a "client" and a "user." A "client" refers to an user visiting the website, and a user could have multiple clients, such as in the case of multiple browser tabs. The system operates as follows when an user connects:
+It is essential to distinguish the terminologies of a "client" and a "user." A "client" refers to an user visiting the website, and a user could have multiple clients (e.g., 2 browser tabs). The system operates as follows when an user connects:
 
 - Every user has a personal queue, e.g., `{user}-messages`, where messages are sent to. If the queue does not exist, it is created on connection.
-- Since one user might have multiple clients, each client has a personal queue, e.g., `{user}-{uuid}-messages`, with a unique identifier (UUID) to distinguish between different client (e.g., an user has multiple tabs open in their browser). This id is created on the client-side.
-- All messages sent to `{user}-messages` are fanout to the personal client queues. For instance, if user "rafa" has three tabs with UUIDs "fgdv2", "5h3kd" and "34jgk", a new message sent to `rafa-messages` will be distributed to `rafa-fdgv2-messages`, `rafa-5h3kd-messages` and `rafa-34jgk-messages`. This ensures all clients ultimately receive the message.
+- Since one user might have multiple clients, each client has a personal queue, `{user}-{uuid}-messages`, with a unique identifier (UUID) to distinguish between different clients. This uuid is created on the client-side.
+- All messages sent to `{user}-messages` will fanout to the personal client queues. For instance, if user "rafa" has three tabs with UUIDs "fgdv2", "5h3kd" and "34jgk", a new message sent to `rafa-messages` will be distributed to `rafa-fdgv2-messages`, `rafa-5h3kd-messages` and `rafa-34jgk-messages`. This ensures all clients ultimately receive the message.
 
 ### Storing Messages
 
@@ -112,8 +99,8 @@ To address this challenge, I have implemented a temporary solution that involves
 CREATE INDEX chat_messages_from_user ON chats.messages(from_user);
 CREATE INDEX chat_messages_to_user ON chats.messages(to_user);
 
-SELECT * FROM chat.messages WHERE from_user="rafa";
-SELECT * FROM chat.messages WHERE to_user="rafa";
+SELECT * FROM chat.messages WHERE from_user='rafa';
+SELECT * FROM chat.messages WHERE to_user='rafa';
 ```
 
 However, it is important to note that this approach has its drawbacks:
